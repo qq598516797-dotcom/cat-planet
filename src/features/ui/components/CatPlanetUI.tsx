@@ -811,6 +811,11 @@ const photoStyleFor = (breed: BreedOrigin) => ({
   objectPosition: breed.photo.objectPosition ?? '50% 38%',
 })
 
+const postcardPhotoStyleFor = (breed: BreedOrigin) => ({
+  objectFit: 'contain' as const,
+  objectPosition: breed.photo.objectPosition ?? '50% 42%',
+})
+
 const playSoftUiSound = () => {
   if (typeof window === 'undefined') return
   const AudioContextClass = window.AudioContext
@@ -2882,6 +2887,7 @@ const ShareCardFace = ({
   const mainEnglishName = mainBreed?.ticaName ?? 'Cat Planet'
   const photoSrc = mainBreed?.photo.src ?? mainBreed?.photo.markerSrc
   const photoStyle = mainBreed ? photoStyleFor(mainBreed) : undefined
+  const postcardPhotoStyle = mainBreed ? postcardPhotoStyleFor(mainBreed) : undefined
   const zodiacLabel = guardianZodiac
     ? `${guardianZodiac.symbol} ${guardianZodiac.name[language]}`
     : copy[language].shareCardFavorites
@@ -2923,7 +2929,7 @@ const ShareCardFace = ({
                 src={photoSrc}
                 alt=""
                 className="share-card-photo"
-                style={photoStyle}
+                style={postcardPhotoStyle}
               />
             )}
           </div>
