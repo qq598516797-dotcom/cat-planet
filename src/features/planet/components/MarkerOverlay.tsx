@@ -40,6 +40,9 @@ interface ScreenMarkerCluster {
 const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+const isCoarsePointer = () =>
+  window.matchMedia('(pointer: coarse)').matches
+
 const preloadedMarkerSources = new Set<string>()
 const markerImageCache: HTMLImageElement[] = []
 
@@ -502,8 +505,12 @@ function MarkerClusterNode({
       style={{
         zIndex: expanded || selected ? 16 : 4 + Math.min(cluster.count, 8),
       } as CSSProperties}
-      onPointerEnter={() => onOpen(cluster.key)}
-      onPointerLeave={() => onClose(cluster)}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== 'touch') onOpen(cluster.key)
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType !== 'touch') onClose(cluster)
+      }}
     >
       <button
         type="button"
@@ -523,11 +530,12 @@ function MarkerClusterNode({
             : cluster.representative.ticaName
         }
         onPointerEnter={(event) => {
-          onOpen(cluster.key)
+          if (event.pointerType !== 'touch') onOpen(cluster.key)
           onShowTooltip(cluster.representative, event, cluster)
           animateCenterHover(event.currentTarget, true)
         }}
         onPointerLeave={(event) => {
+          if (event.pointerType === 'touch') return
           animateCenterHover(event.currentTarget, false)
         }}
         onClick={(event) => {
@@ -709,6 +717,7 @@ export function MarkerOverlay() {
   }
 
   const closeCluster = (cluster: ScreenMarkerCluster) => {
+    if (isCoarsePointer()) return
     if (
       lockedClusterKeyRef.current === cluster.key
       || selectedClusterKeyRef.current === cluster.key
@@ -813,6 +822,7 @@ export function MarkerOverlay() {
             }}
             onToggleLock={(clusterKey) => {
               cancelScheduledClose()
+              lockedClusterKeyRef.current = clusterKey
               setHoveredClusterKey(clusterKey)
               setLockedClusterKey((current) =>
                 current === clusterKey ? current : clusterKey,

@@ -1903,9 +1903,9 @@ input {
     bottom: calc(min(45svh, 390px) + 14px + env(safe-area-inset-bottom));
     left: 10px;
     z-index: 3;
-    max-height: 28svh;
+    max-height: 20svh;
     margin-top: 0;
-    padding: 12px;
+    padding: 10px;
     pointer-events: auto;
   }
 
@@ -1919,7 +1919,10 @@ input {
 
   .detail-photo {
     display: block;
-    aspect-ratio: 21 / 8;
+    aspect-ratio: auto;
+    grid-row: 1 / span 4;
+    width: 132px;
+    height: 118px;
   }
 
   .detail-photo-badge {
@@ -1929,11 +1932,24 @@ input {
   }
 
   .detail-panel article {
-    gap: 9px;
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 8px 10px;
+    align-items: start;
   }
 
   .detail-hero {
-    gap: 9px;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .detail-kicker,
+  .summary {
+    min-width: 0;
+  }
+
+  .detail-cat {
+    display: none;
   }
 
   .alias-panel,
@@ -1941,11 +1957,13 @@ input {
     display: none;
   }
 
-  .story-card,
-  .external-story-stack,
-  .reading-stack,
-  .source-stack {
-    margin-top: 2px;
+  .detail-panel .story-card,
+  .detail-panel .external-story-stack,
+  .detail-panel .reading-stack,
+  .detail-panel .source-stack,
+  .detail-panel .detail-grid,
+  .detail-panel .trait-row {
+    display: none !important;
   }
 
   .empty-detail {
@@ -2031,13 +2049,14 @@ input {
     right: 8px;
     bottom: calc(min(47svh, 386px) + 12px + env(safe-area-inset-bottom));
     left: 8px;
-    max-height: 28svh;
+    max-height: 20svh;
     padding: 10px;
   }
 
   .detail-photo {
     display: block;
-    aspect-ratio: 21 / 8;
+    width: 118px;
+    height: 110px;
   }
 
   .quick-region-dock {
@@ -2075,17 +2094,17 @@ input {
   }
 
   .detail-cat {
-    width: 42px;
-    height: 42px;
-    font-size: 15px;
+    display: none;
   }
 
   h2 {
     font-size: 18px;
+    line-height: 1.1;
   }
 
   .zh-name {
     font-size: 13px;
+    line-height: 1.2;
   }
 
   .summary {
@@ -2093,6 +2112,8 @@ input {
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    font-size: 13px;
+    line-height: 1.42;
   }
 
   .breed-list {
