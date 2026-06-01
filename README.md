@@ -12,9 +12,9 @@ https://qq598516797-dotcom.github.io/cat-planet/
 
 ![Cat Planet desktop home](docs/screenshots/desktop-home.png)
 
-### Photo Markers And Cluster Interaction
+### Breed Stories And Videos
 
-![Cat Planet cluster markers](docs/screenshots/desktop-cluster.png)
+![Cat Planet breed stories and videos](docs/screenshots/story-highlight.png)
 
 ### Breed Detail Reading View
 

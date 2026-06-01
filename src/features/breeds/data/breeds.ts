@@ -1322,7 +1322,7 @@ const photoPool: BreedPhoto[] = [
 
 const breedPhotoRegistry: Record<string, BreedPhoto> = {
   'american-shorthair': {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/5/5d/American_shorthair_cat_Portrait.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/American_shorthair_cat_Portrait.jpg/960px-American_shorthair_cat_Portrait.jpg',
     altZh: '\u7f8e\u56fd\u77ed\u6bdb\u732b\u771f\u5b9e\u8096\u50cf',
     altEn: 'Real American Shorthair cat portrait.',
     credit: 'Nickolas Titkov / Wikimedia Commons',
