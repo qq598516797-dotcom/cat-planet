@@ -1839,26 +1839,31 @@ input {
   }
 
   .workspace-shell {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 9px;
-    padding: 10px;
-    padding-top: 66px;
+    display: block;
+    height: 100svh;
+    padding: 0;
+    pointer-events: none;
   }
 
   .control-panel {
-    order: 3;
-    max-height: 45vh;
+    position: fixed;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+    z-index: 4;
+    max-height: min(45svh, 390px);
     padding: 12px;
+    border-radius: 14px 14px 10px 10px;
+    pointer-events: auto;
   }
 
   .panel-header {
-    margin-bottom: 10px;
+    align-items: center;
+    margin-bottom: 9px;
   }
 
   h1 {
-    font-size: 23px;
+    font-size: 24px;
   }
 
   .language-toggle {
@@ -1871,27 +1876,20 @@ input {
 
   .search-box {
     min-height: 38px;
-    margin-bottom: 9px;
+    margin-bottom: 8px;
   }
 
   .coat-filter {
-    margin-bottom: 9px;
+    margin-bottom: 8px;
   }
 
   .region-grid {
-    display: flex;
-    overflow-x: auto;
-    gap: 7px;
-    margin-bottom: 9px;
-    padding-bottom: 2px;
-  }
-
-  .region-grid button {
-    flex: 0 0 132px;
+    display: none;
   }
 
   .breed-list {
     gap: 7px;
+    max-height: 176px;
   }
 
   .breed-list button {
@@ -1900,11 +1898,19 @@ input {
   }
 
   .detail-panel {
-    order: 2;
-    align-self: stretch;
-    max-height: 31vh;
+    position: fixed;
+    right: 10px;
+    bottom: calc(min(45svh, 390px) + 20px + env(safe-area-inset-bottom));
+    left: 10px;
+    z-index: 3;
+    max-height: 27svh;
     margin-top: 0;
-    padding: 13px;
+    padding: 12px;
+    pointer-events: auto;
+  }
+
+  .detail-panel:has(.empty-detail) {
+    display: none;
   }
 
   .detail-grid {
@@ -1924,9 +1930,18 @@ input {
   }
 
   .quick-region-dock {
-    order: 1;
-    width: 100%;
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
+    right: 64px;
+    left: 10px;
+    z-index: 4;
+    box-sizing: border-box;
+    width: calc(100vw - 84px);
+    max-width: none;
+    padding: 8px 10px;
     margin-bottom: 0;
+    pointer-events: auto;
+    border-radius: 10px;
   }
 
   .scene-caption {
@@ -1934,36 +1949,101 @@ input {
   }
 
   .hud-toggle {
-    top: 14px;
-    right: 14px;
+    top: calc(10px + env(safe-area-inset-top));
+    right: 10px;
   }
 
   .hud-reset {
-    top: 64px;
-    right: 14px;
+    top: calc(58px + env(safe-area-inset-top));
+    right: 10px;
   }
 
   .breed-tooltip {
     display: none;
   }
+
+  .dock-title {
+    margin-bottom: 5px;
+  }
+
+  .dock-pills {
+    gap: 6px;
+    padding-bottom: 1px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+  }
+
+  .dock-pills button {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+    scroll-snap-align: start;
+  }
+
+  .planet-canvas {
+    transform: translateY(-4svh) scale(1.04);
+  }
 }
 
 @media (max-width: 520px) {
   .workspace-shell {
-    padding-inline: 8px;
-    padding-bottom: 8px;
+    padding: 0;
   }
 
   .control-panel {
-    max-height: 48vh;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    left: 8px;
+    max-height: min(47svh, 386px);
+    padding: 10px;
   }
 
   .detail-panel {
-    max-height: 30vh;
+    right: 8px;
+    bottom: calc(min(47svh, 386px) + 18px + env(safe-area-inset-bottom));
+    left: 8px;
+    max-height: 24svh;
+    padding: 10px;
   }
 
   .detail-photo {
     display: none;
+  }
+
+  .quick-region-dock {
+    top: calc(8px + env(safe-area-inset-top));
+    right: 60px;
+    left: 8px;
+    width: calc(100vw - 76px);
+    padding: 8px;
+  }
+
+  .dock-title span {
+    max-width: 7em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dock-pills button {
+    min-height: 31px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .panel-header {
+    gap: 8px;
+  }
+
+  .panel-actions {
+    gap: 6px;
+  }
+
+  .eyebrow {
+    margin-bottom: 4px;
+    font-size: 11px;
   }
 
   .detail-cat {
@@ -1974,6 +2054,10 @@ input {
 
   h2 {
     font-size: 20px;
+  }
+
+  .breed-list {
+    max-height: 180px;
   }
 
   .summary,
