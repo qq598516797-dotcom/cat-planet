@@ -1,73 +1,81 @@
-# React + TypeScript + Vite
+# 猫咪星球 Cat Planet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个真实可交互的 3D 猫咪品种地球图鉴。项目基于 React、TypeScript、Three.js、Drei 和 GSAP 构建，用地球地图展示全球猫咪品种原产地，支持中文搜索、地区筛选、真实照片点位、移动端浏览和品种故事入口。
 
-Currently, two official plugins are available:
+在线体验：
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+https://qq598516797-dotcom.github.io/cat-planet/
 
-## React Compiler
+## 项目预览
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3D 地球图鉴
 
-## Expanding the ESLint configuration
+![Cat Planet desktop home](docs/screenshots/desktop-home.png)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 点位展开与真实照片 marker
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+![Cat Planet cluster markers](docs/screenshots/desktop-cluster.png)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 品种详情阅读
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+![Cat Planet breed detail](docs/screenshots/desktop-detail.png)
+
+### 移动端适配
+
+![Cat Planet mobile](docs/screenshots/mobile-home.png)
+
+## 核心功能
+
+- 真实 Three.js 3D 地球，不是图片或 CSS 假 3D。
+- 全球猫咪品种原产地展示，点位使用真实猫咪照片头像。
+- 智能聚合点位，桌面 hover 展开，移动端 tap 展开。
+- 中文搜索支持常见叫法，例如美短、英短、布偶、缅因、无毛、矮脚、豹猫。
+- 中英文切换。
+- 地区快速选择：全球、亚洲、欧洲、北美洲、中东、非洲/大洋洲。
+- 品种详情包含真实照片、原产地、常用叫法、图鉴信息、故事与视频入口。
+- GSAP 开场动画和界面动效。
+- 桌面端与移动端响应式布局。
+
+## 技术栈
+
+- Vite
+- React
+- TypeScript
+- Three.js
+- @react-three/fiber
+- @react-three/drei
+- GSAP
+- Zustand
+- Lucide React
+
+## 本地运行
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+构建：
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+代码检查：
+
+```bash
+npm run lint
+```
+
+## 数据说明
+
+品种名称以 TICA 品种资料为主要参考来源。原产地坐标使用国家或历史地区质心，用于图鉴展示，不代表精确出生地点。图片、故事和外部视频入口会在详情页中保留来源说明。
+
+## 项目状态
+
+当前版本是可公开演示的 MVP Preview。后续计划继续优化：
+
+- 补齐更多品种的真实故事、新闻或视频来源。
+- 优化移动端详情阅读体验。
+- 继续提升点位聚合与动画性能。
+- 增加更多可视化筛选方式。
