@@ -22,7 +22,7 @@ https://qq598516797-dotcom.github.io/cat-planet/
 
 ### Mobile Experience
 
-![Cat Planet mobile](docs/screenshots/mobile-home.png)
+<img src="docs/screenshots/mobile-showcase.png" alt="Cat Planet mobile experience" width="360" />
 
 ## Features
 
