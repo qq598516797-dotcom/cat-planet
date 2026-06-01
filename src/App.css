@@ -1230,7 +1230,22 @@ input {
   box-shadow: 0 8px 18px rgba(96, 48, 65, 0.16);
 }
 
+.daily-cat-photo::before {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ivory);
+  content: ':3';
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.94), transparent 30%),
+    linear-gradient(135deg, rgba(255, 151, 183, 0.92), rgba(255, 177, 95, 0.78));
+  font-size: 11px;
+  font-weight: 950;
+}
+
 .daily-cat-photo img {
+  position: relative;
   width: 100%;
   height: 100%;
 }
@@ -2063,13 +2078,13 @@ input {
 
 .experience-panel {
   position: absolute;
-  top: 88px;
+  top: 72px;
   left: 50%;
   z-index: 3;
   display: flex;
-  width: min(560px, calc(100vw - 780px));
-  min-width: 360px;
-  max-height: calc(100vh - 260px);
+  width: min(760px, calc(100vw - 670px));
+  min-width: 430px;
+  max-height: calc(100vh - 126px);
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
@@ -2083,6 +2098,63 @@ input {
   transform: translateX(-50%);
   pointer-events: auto;
   backdrop-filter: blur(30px) saturate(175%);
+}
+
+@media (min-width: 981px) {
+  .workspace-shell[data-experience='passport'] .experience-panel {
+    top: 52px;
+    left: calc(50% + 50px);
+    width: min(800px, calc(100vw - 640px));
+    max-height: calc(100vh - 82px);
+  }
+
+  .workspace-shell[data-experience='passport'] .detail-panel {
+    display: none;
+  }
+
+  .workspace-shell[data-experience='passport'] .passport-panel {
+    gap: 10px;
+  }
+
+  .workspace-shell[data-experience='passport'] .passport-card {
+    padding: 12px;
+  }
+
+  .workspace-shell[data-experience='passport'] .passport-card h3 {
+    font-size: 19px;
+  }
+
+  .workspace-shell[data-experience='passport'] .passport-purpose {
+    max-width: 56ch;
+    line-height: 1.36;
+  }
+
+  .workspace-shell[data-experience='passport'] .share-card-face {
+    min-height: 500px;
+    padding: 22px 26px 20px;
+  }
+
+  .workspace-shell[data-experience='passport'] .share-card-editorial-head strong {
+    font-size: clamp(44px, 4.4vw, 58px);
+  }
+
+  .workspace-shell[data-experience='passport'] .share-card-front-title h4,
+  .workspace-shell[data-experience='passport'] .share-card-back-copy h4 {
+    font-size: 34px;
+  }
+
+  .workspace-shell[data-experience='passport'] .share-card-back-grid {
+    grid-template-columns: minmax(260px, 1fr) minmax(190px, 0.78fr);
+  }
+
+  .workspace-shell[data-experience='passport'] .share-card-back-photo {
+    min-height: 260px;
+  }
+
+  .workspace-shell[data-experience='passport'] .share-card-mini-cats img {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 .experience-panel-header,
@@ -2363,6 +2435,33 @@ input {
     linear-gradient(135deg, rgba(255, 243, 238, 0.86), rgba(207, 239, 255, 0.52));
 }
 
+@media (min-width: 700px) {
+  .passport-card.has-share-card {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    gap: 10px 16px;
+    align-items: start;
+  }
+
+  .passport-card.has-share-card > span,
+  .passport-card.has-share-card > h3,
+  .passport-card.has-share-card > .passport-purpose {
+    grid-column: 1;
+  }
+
+  .passport-card.has-share-card > .share-card-side-switch {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: end;
+    justify-self: end;
+    width: 100%;
+  }
+
+  .passport-card.has-share-card > .share-card-face,
+  .passport-card.has-share-card > .passport-cta-row {
+    grid-column: 1 / -1;
+  }
+}
+
 .passport-purpose {
   max-width: 46ch;
   color: var(--muted);
@@ -2378,7 +2477,7 @@ input {
 
 .passport-card h3 {
   color: var(--ivory);
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .passport-card div {
@@ -2958,6 +3057,7 @@ input {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  max-width: 420px;
 }
 
 .share-card-side-switch button {
@@ -2972,15 +3072,15 @@ input {
 }
 
 .share-card-face {
-  --card-scale: 0.88;
   position: relative;
   isolation: isolate;
   display: grid;
-  width: min(100%, 380px);
-  min-height: 476px;
+  width: min(100%, 620px);
+  min-height: 540px;
   overflow: hidden;
   gap: 14px;
-  padding: 22px 24px 20px;
+  justify-self: center;
+  padding: 26px 28px 24px;
   border: 1px solid rgba(82, 54, 62, 0.18);
   border-radius: 3px;
   color: #32252b;
@@ -2992,12 +3092,6 @@ input {
     inset 0 0 0 1px rgba(255, 255, 255, 0.72);
   transform-origin: center;
   will-change: transform, opacity, filter;
-}
-
-.passport-card > .share-card-face {
-  transform: scale(var(--card-scale));
-  transform-origin: top left;
-  margin-bottom: calc((var(--card-scale) - 1) * 476px);
 }
 
 .share-card-face::before {
@@ -3045,7 +3139,7 @@ input {
 .share-card-editorial-head {
   display: grid;
   gap: 4px;
-  padding-right: 116px;
+  padding-right: 128px;
 }
 
 .share-card-kicker,
@@ -3064,7 +3158,7 @@ input {
 .share-card-editorial-head strong {
   color: #2f2229;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(38px, 7.4vw, 54px);
+  font-size: clamp(46px, 4.8vw, 62px);
   font-weight: 500;
   line-height: 0.9;
 }
@@ -3116,7 +3210,7 @@ input {
 .share-card-back-copy h4 {
   color: #2f2229;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 30px;
+  font-size: 36px;
   font-weight: 500;
   line-height: 0.98;
 }
@@ -3146,25 +3240,33 @@ input {
 }
 
 .share-card-front-photo {
-  height: 148px;
-  margin: 4px -24px -20px;
+  height: 196px;
+  margin: 4px -28px -24px;
 }
 
 .share-card-back-grid {
   display: grid !important;
-  grid-template-columns: 170px minmax(0, 1fr);
-  gap: 14px !important;
+  grid-template-columns: minmax(270px, 1fr) minmax(190px, 0.78fr);
+  gap: 22px !important;
   align-items: stretch;
 }
 
 .share-card-back-photo {
-  min-height: 188px;
+  min-height: 286px;
+}
+
+.share-card-back-photo .share-card-photo {
+  object-fit: contain !important;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 229, 238, 0.88), transparent 52%),
+    linear-gradient(135deg, rgba(255, 246, 249, 0.92), rgba(225, 243, 255, 0.8));
 }
 
 .share-card-back-copy {
   display: grid;
   gap: 8px;
   min-width: 0;
+  align-content: center;
 }
 
 .share-card-back-copy dl {
@@ -3219,8 +3321,8 @@ input {
 }
 
 .share-card-mini-cats img {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   border: 2px solid #fff;
   border-radius: 50%;
   box-shadow: 0 8px 16px rgba(71, 43, 54, 0.14);
@@ -3255,8 +3357,8 @@ input {
   left: -9999px;
   top: 0;
   display: grid !important;
-  width: 812px;
-  grid-template-columns: repeat(2, 380px);
+  width: 1288px;
+  grid-template-columns: repeat(2, 620px);
   gap: 24px !important;
   padding: 24px;
   background: #fff7f3;
@@ -3264,19 +3366,24 @@ input {
 }
 
 .passport-cta-row {
-  display: flex !important;
-  flex-wrap: wrap;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px !important;
+  max-width: 640px;
+  justify-self: center;
+  width: 100%;
 }
 
 .passport-cta-row button {
   display: inline-flex;
   min-height: 34px;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 0 10px;
   font-size: 12px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .passport-saved-list {
@@ -3472,6 +3579,10 @@ input {
     border-radius: 12px;
   }
 
+  .workspace-shell[data-experience='passport'] .detail-panel {
+    display: none;
+  }
+
   .experience-panel-header h2 {
     font-size: 18px;
   }
@@ -3531,7 +3642,7 @@ input {
 
   .share-card-face {
     width: 100%;
-    min-height: 500px;
+    min-height: 540px;
     padding: 20px 18px 18px;
   }
 
@@ -3550,7 +3661,7 @@ input {
   }
 
   .share-card-editorial-head strong {
-    font-size: 38px;
+    font-size: clamp(38px, 10vw, 52px);
   }
 
   .share-card-front-title h4,
@@ -3563,7 +3674,7 @@ input {
   }
 
   .share-card-front-photo {
-    height: 154px;
+    height: 176px;
     margin: 4px -18px -18px;
   }
 
@@ -3572,7 +3683,7 @@ input {
   }
 
   .share-card-back-photo {
-    min-height: 148px;
+    min-height: 240px;
   }
 
   .share-card-mini-cats {
@@ -3585,8 +3696,12 @@ input {
   }
 
   .share-card-duo-export {
-    width: 760px;
-    grid-template-columns: repeat(2, 356px);
+    width: 1088px;
+    grid-template-columns: repeat(2, 520px);
+  }
+
+  .passport-cta-row {
+    grid-template-columns: 1fr;
   }
 
   .passport-breed {
@@ -3763,5 +3878,99 @@ input {
   .story-card p,
   .reading-section p {
     font-size: 13px;
+  }
+
+  .experience-panel[data-experience='passport'] {
+    top: calc(58px + env(safe-area-inset-top));
+    bottom: calc(34svh + 12px + env(safe-area-inset-bottom));
+  }
+
+  .workspace-shell[data-experience='passport'] .experience-panel {
+    z-index: 6;
+    top: calc(50px + env(safe-area-inset-top));
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    left: 8px;
+    width: auto;
+    min-width: 0;
+    transform: none;
+  }
+
+  .workspace-shell[data-experience='passport'] .control-panel {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
+  .passport-card {
+    padding: 10px;
+  }
+
+  .passport-purpose {
+    font-size: 11px;
+  }
+
+  .share-card-side-switch {
+    max-width: none;
+  }
+
+  .share-card-face {
+    min-height: 500px;
+    gap: 11px;
+    padding: 18px 15px 16px;
+  }
+
+  .share-card-postmark {
+    top: 15px;
+    right: 15px;
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+
+  .share-card-editorial-head {
+    padding-right: 78px;
+  }
+
+  .share-card-editorial-head strong {
+    font-size: 36px;
+  }
+
+  .share-card-front-title h4,
+  .share-card-back-copy h4 {
+    font-size: 26px;
+  }
+
+  .share-card-front-photo {
+    height: 154px;
+    margin: 2px -15px -16px;
+  }
+
+  .share-card-back-photo {
+    min-height: 204px;
+  }
+
+  .share-card-copy {
+    font-size: 11px;
+  }
+
+  .share-card-mini-cats {
+    gap: 6px !important;
+  }
+
+  .share-card-mini-cats span {
+    padding: 6px 4px;
+  }
+
+  .share-card-mini-cats img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .share-card-editorial-foot {
+    gap: 7px !important;
+  }
+
+  .passport-download {
+    min-height: 36px;
   }
 }

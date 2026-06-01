@@ -1212,7 +1212,12 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
       )}
 
       {uiVisible && (
-        <div ref={workspaceRef} className="workspace-shell" aria-label="Cat planet controls">
+        <div
+          ref={workspaceRef}
+          className="workspace-shell"
+          data-experience={activeExperience}
+          aria-label="Cat planet controls"
+        >
           <aside className="control-panel">
             <div className="panel-header">
               <div>
@@ -1385,25 +1390,27 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
             />
           )}
 
-          <section className="quick-region-dock" aria-label={t.regions}>
-            <div className="dock-title">
-              <MapPin size={15} />
-              <span>{t.regions}</span>
-            </div>
-            <div className="dock-pills">
-              {regions.map((region) => (
-                <button
-                  key={region}
-                  type="button"
-                  className={region === activeRegion ? 'active' : ''}
-                  data-region={region}
-                  onClick={() => handleRegionSelect(region)}
-                >
-                  {regionLabel[language][region]} {regionCount(region, coatFilter)}
-                </button>
-              ))}
-            </div>
-          </section>
+          {activeExperience === 'atlas' && (
+            <section className="quick-region-dock" aria-label={t.regions}>
+              <div className="dock-title">
+                <MapPin size={15} />
+                <span>{t.regions}</span>
+              </div>
+              <div className="dock-pills">
+                {regions.map((region) => (
+                  <button
+                    key={region}
+                    type="button"
+                    className={region === activeRegion ? 'active' : ''}
+                    data-region={region}
+                    onClick={() => handleRegionSelect(region)}
+                  >
+                    {regionLabel[language][region]} {regionCount(region, coatFilter)}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
 
@@ -1526,7 +1533,14 @@ function DailyCatCard({
   return (
     <button type="button" className="daily-cat-card" onClick={() => onSelect(breed)}>
       <span className="daily-cat-photo">
-        <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
+        <img
+          src={breed.photo.markerSrc ?? breed.photo.src}
+          alt=""
+          style={photoStyleFor(breed)}
+          onError={(event) => {
+            event.currentTarget.style.display = 'none'
+          }}
+        />
       </span>
       <span>
         <small><CalendarDays size={12} /> {t.dailyCat}</small>
@@ -2547,10 +2561,10 @@ function PassportExperience({
   const guardianBreeds = guardianBreedIds
     .map((id) => getBreedById(id))
     .filter((breed): breed is BreedOrigin => Boolean(breed))
-  const mainGuardian = guardianBreeds[0] ?? favoriteBreeds[0] ?? null
   const cardBreeds = shareCardMode === 'guardian'
     ? guardianBreeds
     : favoriteBreeds
+  const mainGuardian = cardBreeds[0] ?? guardianBreeds[0] ?? favoriteBreeds[0] ?? null
   const hasCardData = Boolean(mainGuardian) || favoriteBreeds.length > 0
   const displayedBreeds = (cardBreeds.length > 0 ? cardBreeds : favoriteBreeds).slice(0, 3)
   const cardTitle = shareCardMode === 'guardian'
@@ -2699,7 +2713,7 @@ function PassportExperience({
           {copy[language].shareCardModeFavorites}
         </button>
       </div>
-      <div className="passport-card">
+      <div className={`passport-card ${hasCardData ? 'has-share-card' : ''}`}>
         <span>{copy[language].passportTitle}</span>
         <h3>{copy[language].shareCardTitle}</h3>
         <p className="passport-purpose">{copy[language].shareCardPurpose}</p>
