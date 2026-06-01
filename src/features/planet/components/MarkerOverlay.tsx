@@ -586,6 +586,8 @@ export function MarkerOverlay() {
   const latestProjectionsRef = useRef<ProjectedBreedMarker[]>(getLatestMarkerProjections())
   const layoutSignatureRef = useRef('')
   const closeTimerRef = useRef<number | null>(null)
+  const lockedClusterKeyRef = useRef<string | null>(null)
+  const selectedClusterKeyRef = useRef<string | null>(null)
   const uiVisible = useCatPlanetStore((state) => state.uiVisible)
   const activeRegion = useCatPlanetStore((state) => state.activeRegion)
   const searchQuery = useCatPlanetStore((state) => state.searchQuery)
@@ -647,6 +649,14 @@ export function MarkerOverlay() {
   )
 
   useEffect(() => {
+    lockedClusterKeyRef.current = lockedClusterKey
+  }, [lockedClusterKey])
+
+  useEffect(() => {
+    selectedClusterKeyRef.current = selectedClusterKey
+  }, [selectedClusterKey])
+
+  useEffect(() => {
     const ids = new Set<string>()
     clusters.forEach((cluster) => {
       ids.add(markerSourceFor(cluster.representative))
@@ -699,9 +709,16 @@ export function MarkerOverlay() {
   }
 
   const closeCluster = (cluster: ScreenMarkerCluster) => {
-    if (lockedClusterKey === cluster.key || selectedClusterKey === cluster.key) return
+    if (
+      lockedClusterKeyRef.current === cluster.key
+      || selectedClusterKeyRef.current === cluster.key
+    ) return
     cancelScheduledClose()
     closeTimerRef.current = window.setTimeout(() => {
+      if (
+        lockedClusterKeyRef.current === cluster.key
+        || selectedClusterKeyRef.current === cluster.key
+      ) return
       setHoveredClusterKey((current) => (current === cluster.key ? null : current))
       setClosingClusterKey(cluster.key)
       setHoveredBreedId(null)
@@ -795,8 +812,10 @@ export function MarkerOverlay() {
               setClosingClusterKey(null)
             }}
             onToggleLock={(clusterKey) => {
+              cancelScheduledClose()
+              setHoveredClusterKey(clusterKey)
               setLockedClusterKey((current) =>
-                current === clusterKey ? null : clusterKey,
+                current === clusterKey ? current : clusterKey,
               )
             }}
             onShowTooltip={showTooltip}

@@ -1900,10 +1900,10 @@ input {
   .detail-panel {
     position: fixed;
     right: 10px;
-    bottom: calc(min(45svh, 390px) + 20px + env(safe-area-inset-bottom));
+    bottom: calc(min(45svh, 390px) + 14px + env(safe-area-inset-bottom));
     left: 10px;
     z-index: 3;
-    max-height: 27svh;
+    max-height: 28svh;
     margin-top: 0;
     padding: 12px;
     pointer-events: auto;
@@ -1918,7 +1918,34 @@ input {
   }
 
   .detail-photo {
+    display: block;
     aspect-ratio: 21 / 8;
+  }
+
+  .detail-photo-badge {
+    max-width: 72%;
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+
+  .detail-panel article {
+    gap: 9px;
+  }
+
+  .detail-hero {
+    gap: 9px;
+  }
+
+  .alias-panel,
+  .detail-panel section:not(.story-card):not(.external-story-stack):not(.reading-stack):not(.source-stack) {
+    display: none;
+  }
+
+  .story-card,
+  .external-story-stack,
+  .reading-stack,
+  .source-stack {
+    margin-top: 2px;
   }
 
   .empty-detail {
@@ -2002,14 +2029,15 @@ input {
 
   .detail-panel {
     right: 8px;
-    bottom: calc(min(47svh, 386px) + 18px + env(safe-area-inset-bottom));
+    bottom: calc(min(47svh, 386px) + 12px + env(safe-area-inset-bottom));
     left: 8px;
-    max-height: 24svh;
+    max-height: 28svh;
     padding: 10px;
   }
 
   .detail-photo {
-    display: none;
+    display: block;
+    aspect-ratio: 21 / 8;
   }
 
   .quick-region-dock {
@@ -2047,17 +2075,28 @@ input {
   }
 
   .detail-cat {
-    width: 54px;
-    height: 54px;
-    font-size: 18px;
+    width: 42px;
+    height: 42px;
+    font-size: 15px;
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  .zh-name {
+    font-size: 13px;
+  }
+
+  .summary {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .breed-list {
-    max-height: 180px;
+    max-height: 166px;
   }
 
   .summary,
