@@ -3,6 +3,7 @@ export interface ProjectedBreedMarker {
   x: number
   y: number
   visible: boolean
+  edgeFactor: number
   depth: number
   screenScale: number
 }

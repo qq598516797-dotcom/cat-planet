@@ -24,6 +24,7 @@ interface ClusterItem {
   x: number
   y: number
   delay: number
+  hidden?: boolean
 }
 
 interface ScreenMarkerCluster {
@@ -32,6 +33,9 @@ interface ScreenMarkerCluster {
   y: number
   count: number
   screenScale: number
+  edgeFactor: number
+  expandable: boolean
+  hiddenCount: number
   representative: BreedOrigin
   breeds: BreedOrigin[]
   items: ClusterItem[]
@@ -49,6 +53,8 @@ const markerImageCache: HTMLImageElement[] = []
 const markerSourceFor = (breed: BreedOrigin) => breed.photo.markerSrc ?? breed.photo.src
 const markerPositionFor = (breed: BreedOrigin) =>
   breed.photo.markerObjectPosition ?? breed.photo.objectPosition ?? '50% 38%'
+
+const MAX_EXPANDED_ITEMS = 12
 
 const preloadMarkerSource = (src: string) => {
   if (preloadedMarkerSources.has(src)) return
@@ -121,19 +127,25 @@ const spreadOffsetFor = (
   const remaining = count - consumed
   const itemsInRing = Math.min(ringCapacities[ring], remaining)
   const radius = count <= 8 ? 58 : 62 + ring * 50 + Math.min(count, 34) * 0.28
-  const angleOffset = count > 10 ? -Math.PI / 2 : -Math.PI / 2.35
-  const angle = angleOffset + (indexInRing / itemsInRing) * Math.PI * 2 + ring * 0.22
-  const raw = {
-    x: Math.cos(angle) * radius,
-    y: Math.sin(angle) * radius,
-  }
-
   const desktop = viewport.width >= 1024 && uiVisible
   const bounds = {
     left: desktop ? 382 : 48,
     right: desktop ? viewport.width - 420 : viewport.width - 48,
     top: 64,
     bottom: viewport.height - 92,
+  }
+  const nearLeft = anchor.x < bounds.left + 92
+  const nearRight = anchor.x > bounds.right - 92
+  const nearTop = anchor.y < bounds.top + 76
+  const nearBottom = anchor.y > bounds.bottom - 76
+  const centerAngle = Math.atan2(viewport.height / 2 - anchor.y, viewport.width / 2 - anchor.x)
+  const useFan = nearLeft || nearRight || nearTop || nearBottom
+  const angleRange = useFan ? Math.PI * 1.12 : Math.PI * 2
+  const angleStart = useFan ? centerAngle - angleRange / 2 : count > 10 ? -Math.PI / 2 : -Math.PI / 2.35
+  const angle = angleStart + (itemsInRing === 1 ? 0 : indexInRing / Math.max(1, itemsInRing - 1)) * angleRange + ring * 0.18
+  const raw = {
+    x: Math.cos(angle) * radius,
+    y: Math.sin(angle) * radius,
   }
 
   return {
@@ -160,7 +172,7 @@ const buildClusters = (
 
   if (markers.length === 0) return []
 
-  const collisionDistance = viewport.width < 640 ? 50 : 46
+  const collisionDistance = viewport.width < 640 ? 58 : 54
   const unionFind = createUnionFind(markers.length)
 
   for (let a = 0; a < markers.length; a += 1) {
@@ -195,9 +207,14 @@ const buildClusters = (
         group.reduce((total, marker) => total + marker.projection.y, 0) / group.length
       const screenScale =
         group.reduce((total, marker) => total + marker.projection.screenScale, 0) / group.length
+      const edgeFactor =
+        group.reduce((total, marker) => total + marker.projection.edgeFactor, 0) / group.length
+      const expandable = edgeFactor > 0.58
       const key = sortedBreeds.map((breed) => breed.id).join('|')
-      const items = sortedBreeds.map((breed, index) => {
-        const offset = spreadOffsetFor(index, sortedBreeds.length, { x, y }, viewport, uiVisible)
+      const visibleExpandedBreeds = sortedBreeds.slice(0, MAX_EXPANDED_ITEMS)
+      const hiddenCount = Math.max(0, sortedBreeds.length - visibleExpandedBreeds.length)
+      const items = visibleExpandedBreeds.map((breed, index) => {
+        const offset = spreadOffsetFor(index, visibleExpandedBreeds.length, { x, y }, viewport, uiVisible)
         return {
           breed,
           x: offset.x,
@@ -212,6 +229,9 @@ const buildClusters = (
         y,
         count: sortedBreeds.length,
         screenScale,
+        edgeFactor,
+        expandable,
+        hiddenCount,
         representative,
         breeds: sortedBreeds,
         items,
@@ -324,6 +344,10 @@ function MarkerClusterNode({
   ) => void
 }) {
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const rootSettersRef = useRef<{
+    opacity: ReturnType<typeof gsap.quickSetter>
+    scale: ReturnType<typeof gsap.quickSetter>
+  } | null>(null)
   const quickXRef = useRef<gsap.QuickToFunc | null>(null)
   const quickYRef = useRef<gsap.QuickToFunc | null>(null)
   const itemRefs = useRef(new Map<string, HTMLButtonElement>())
@@ -345,8 +369,13 @@ function MarkerClusterNode({
     gsap.set(root, {
       x: cluster.x,
       y: cluster.y,
-      scale: 1,
+      scale: (0.72 + cluster.edgeFactor * 0.28) * cluster.screenScale,
+      opacity: 0.28 + cluster.edgeFactor * 0.72,
     })
+    rootSettersRef.current = {
+      opacity: gsap.quickSetter(root, 'opacity'),
+      scale: gsap.quickSetter(root, 'scale'),
+    }
     quickXRef.current = gsap.quickTo(root, 'x', {
       duration: reduceMotion ? 0.01 : 0.18,
       ease: 'power2.out',
@@ -358,15 +387,18 @@ function MarkerClusterNode({
 
     return () => {
       gsap.killTweensOf(root)
+      rootSettersRef.current = null
       quickXRef.current = null
       quickYRef.current = null
     }
-  }, [cluster.x, cluster.y])
+  }, [cluster.edgeFactor, cluster.screenScale, cluster.x, cluster.y])
 
   useEffect(() => {
     quickXRef.current?.(cluster.x)
     quickYRef.current?.(cluster.y)
-  }, [cluster.x, cluster.y])
+    rootSettersRef.current?.opacity(0.28 + cluster.edgeFactor * 0.72)
+    rootSettersRef.current?.scale((0.72 + cluster.edgeFactor * 0.28) * cluster.screenScale)
+  }, [cluster.edgeFactor, cluster.screenScale, cluster.x, cluster.y])
 
   useEffect(() => {
     if (!renderExpanded) return
@@ -506,7 +538,7 @@ function MarkerClusterNode({
         zIndex: expanded || selected ? 16 : 4 + Math.min(cluster.count, 8),
       } as CSSProperties}
       onPointerEnter={(event) => {
-        if (event.pointerType !== 'touch') onOpen(cluster.key)
+        if (event.pointerType !== 'touch' && cluster.expandable) onOpen(cluster.key)
       }}
       onPointerLeave={(event) => {
         if (event.pointerType !== 'touch') onClose(cluster)
@@ -530,7 +562,7 @@ function MarkerClusterNode({
             : cluster.representative.ticaName
         }
         onPointerEnter={(event) => {
-          if (event.pointerType !== 'touch') onOpen(cluster.key)
+          if (event.pointerType !== 'touch' && cluster.expandable) onOpen(cluster.key)
           onShowTooltip(cluster.representative, event, cluster)
           animateCenterHover(event.currentTarget, true)
         }}
@@ -544,6 +576,7 @@ function MarkerClusterNode({
             onSelectBreed(directBreed, event)
             return
           }
+          if (!cluster.expandable) return
           onToggleLock(cluster.key)
           onShowTooltip(cluster.representative, event, cluster)
         }}
@@ -583,6 +616,11 @@ function MarkerClusterNode({
               </button>
             )
           })}
+          {cluster.hiddenCount > 0 && (
+            <span className="screen-marker-more">
+              +{cluster.hiddenCount}
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -783,6 +821,7 @@ export function MarkerOverlay() {
             cluster.key === hoveredClusterKey
             || cluster.key === lockedClusterKey
             || cluster.key === selectedClusterKey
+          if (!cluster.expandable) return []
           return cluster.items.map((item) => (
             <line
               key={`${cluster.key}-${item.breed.id}`}
@@ -798,9 +837,12 @@ export function MarkerOverlay() {
 
       {clusters.map((cluster) => {
         const expanded =
-          cluster.key === hoveredClusterKey
-          || cluster.key === lockedClusterKey
-          || cluster.key === selectedClusterKey
+          cluster.expandable
+          && (
+            cluster.key === hoveredClusterKey
+            || cluster.key === lockedClusterKey
+            || cluster.key === selectedClusterKey
+          )
         const closing = cluster.key === closingClusterKey && !expanded
         const renderExpanded = (expanded || closing) && cluster.count > 1
         const selected = cluster.breeds.some((breed) => breed.id === selectedBreedId)

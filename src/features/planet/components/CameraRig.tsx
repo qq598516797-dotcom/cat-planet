@@ -15,7 +15,7 @@ export function CameraRig() {
   )
 
   useEffect(() => {
-    camera.position.set(0.2, 0.65, 4.2)
+    camera.position.set(0.22, 0.68, 4.55)
     camera.lookAt(0, 0, 0)
   }, [camera])
 
@@ -76,8 +76,8 @@ export function CameraRig() {
       enablePan={false}
       enableDamping
       dampingFactor={0.07}
-      minDistance={1.8}
-      maxDistance={5.6}
+      minDistance={2.05}
+      maxDistance={5.9}
       rotateSpeed={0.58}
       zoomSpeed={0.72}
       touches={{

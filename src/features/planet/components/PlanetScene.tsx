@@ -31,7 +31,7 @@ export function PlanetScene() {
   return (
     <Canvas
       className="planet-canvas"
-      camera={{ position: [0.2, 0.65, 4.2], fov: 42, near: 0.1, far: 80 }}
+      camera={{ position: [0.22, 0.68, 4.55], fov: 40, near: 0.1, far: 80 }}
       dpr={[1, 1.35]}
       gl={{
         antialias: true,

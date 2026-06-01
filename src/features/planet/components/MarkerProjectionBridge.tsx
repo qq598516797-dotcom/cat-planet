@@ -8,7 +8,8 @@ import { useCatPlanetStore } from '../store/useCatPlanetStore'
 
 const PROJECTION_FPS = 24
 const MARKER_RADIUS = 1.09
-const EDGE_VISIBILITY_BIAS = -0.12
+const EDGE_VISIBILITY_BIAS = 0.02
+const EDGE_FADE_START = 0.42
 
 export function MarkerProjectionBridge() {
   const { camera, size } = useThree()
@@ -43,12 +44,14 @@ export function MarkerProjectionBridge() {
 
     scratchCameraNormal.current.copy(camera.position).normalize()
     const cameraDistance = Math.max(1, camera.position.length())
-    const screenScale = THREE.MathUtils.clamp(4.2 / cameraDistance, 0.74, 1.18)
+    const screenScale = THREE.MathUtils.clamp(cameraDistance / 4.25, 0.95, 1.22)
 
     const projections = markerPositions.map(({ breedId, world }) => {
       const projected = scratchProjected.current.copy(world).project(camera)
       const normal = world.clone().normalize()
-      const isFrontFacing = normal.dot(scratchCameraNormal.current) > EDGE_VISIBILITY_BIAS
+      const facing = normal.dot(scratchCameraNormal.current)
+      const edgeFactor = THREE.MathUtils.clamp((facing - EDGE_VISIBILITY_BIAS) / EDGE_FADE_START, 0, 1)
+      const isFrontFacing = facing > EDGE_VISIBILITY_BIAS
       const visible =
         isFrontFacing
         && projected.z > -1
@@ -63,6 +66,7 @@ export function MarkerProjectionBridge() {
         x: (projected.x * 0.5 + 0.5) * size.width,
         y: (-projected.y * 0.5 + 0.5) * size.height,
         visible,
+        edgeFactor,
         depth: projected.z,
         screenScale,
       }

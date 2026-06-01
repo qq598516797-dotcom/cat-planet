@@ -141,6 +141,56 @@ export interface BreedExternalStory {
   platform?: ExternalStoryPlatform
 }
 
+export interface BreedPersonalityRadar {
+  affectionate: number
+  active: number
+  calm: number
+  grooming: number
+  beginnerFriendly: number
+  shedding: number
+}
+
+export interface BreedCareGuide {
+  groomingZh: string
+  groomingEn: string
+  activityZh: string
+  activityEn: string
+  familyFitZh: string
+  familyFitEn: string
+  attentionZh: string
+  attentionEn: string
+  healthNoteZh: string
+  healthNoteEn: string
+}
+
+export interface BreedRouteStop {
+  labelZh: string
+  labelEn: string
+  noteZh: string
+  noteEn: string
+  lat: number
+  lon: number
+}
+
+export interface BreedExplorationRoute {
+  titleZh: string
+  titleEn: string
+  summaryZh: string
+  summaryEn: string
+  stops: BreedRouteStop[]
+  sourceLinks: BreedSourceLink[]
+}
+
+export interface BreedConstellationStory {
+  type: ExternalStorySourceType | StorySourceType
+  titleZh: string
+  titleEn: string
+  summaryZh: string
+  summaryEn: string
+  url: string
+  sourceName: string
+}
+
 interface BaseBreedOrigin {
   id: string
   ticaName: string
@@ -172,6 +222,10 @@ export interface BreedOrigin extends BaseBreedOrigin {
   readingSections: BreedReadingSection[]
   sourceLinks: BreedSourceLink[]
   externalStories: BreedExternalStory[]
+  personalityRadar: BreedPersonalityRadar
+  careGuide: BreedCareGuide
+  explorationRoute?: BreedExplorationRoute
+  constellationStories: BreedConstellationStory[]
 }
 
 export const ticaBreedSource = 'https://tica.org/ticas-breeds/browse-all-breeds/'
@@ -1651,6 +1705,74 @@ const buildDetailFacts = (breed: BaseBreedOrigin, coatLength: CoatLength): Breed
   colors: breed.traits.slice(0, 2),
 })
 
+const clampRadar = (value: number) => Math.max(1, Math.min(5, value))
+
+const personalityRadarFor = (
+  breed: BaseBreedOrigin,
+  coatLength: CoatLength,
+): BreedPersonalityRadar => {
+  const traits = breed.traits.join(' ').toLowerCase()
+  const longOrHeavyCoat = coatLength === 'long' || coatLength === 'mixed'
+  const rexOrHairless = coatLength === 'rex' || coatLength === 'hairless'
+  const highEnergy = /active|athletic|lively|playful|energetic|agile|curious|vocal/.test(traits)
+  const quiet = /quiet|calm|reserved|gentle|steady|easygoing/.test(traits)
+  const social = /social|affectionate|friendly|people|devoted|gentle|easygoing/.test(traits)
+  const wildLook = /spotted|wild|serval|jungle|athletic|tall/.test(traits)
+
+  return {
+    affectionate: clampRadar((social ? 4 : 3) + (quiet ? 1 : 0)),
+    active: clampRadar((highEnergy ? 4 : 3) + (wildLook ? 1 : 0) - (quiet ? 1 : 0)),
+    calm: clampRadar((quiet ? 4 : 3) - (highEnergy ? 1 : 0)),
+    grooming: clampRadar((longOrHeavyCoat ? 4 : 2) + (rexOrHairless ? 1 : 0)),
+    beginnerFriendly: clampRadar((quiet || social ? 4 : 3) - (wildLook ? 1 : 0) - (rexOrHairless ? 1 : 0)),
+    shedding: clampRadar(longOrHeavyCoat ? 4 : coatLength === 'hairless' ? 1 : 3),
+  }
+}
+
+const careGuideFor = (
+  breed: BaseBreedOrigin,
+  coatLength: CoatLength,
+): BreedCareGuide => {
+  const highGrooming = coatLength === 'long' || coatLength === 'mixed'
+  const specialSkinCare = coatLength === 'hairless'
+  const traits = breed.traits.join(' ').toLowerCase()
+  const activeBreed = /active|athletic|lively|playful|energetic|agile|curious|vocal/.test(traits)
+  const familyFriendly = /gentle|easygoing|social|friendly|devoted/.test(traits)
+
+  return {
+    groomingZh: specialSkinCare
+      ? '少毛不等于少护理，建议关注皮肤清洁、保暖和防晒。'
+      : highGrooming
+        ? '长毛或蓬松被毛建议保持规律梳理，减少打结和毛球。'
+        : '短毛日常护理相对轻松，保持基础梳理和观察即可。',
+    groomingEn: specialSkinCare
+      ? 'Less coat does not mean less care; watch skin cleaning, warmth, and sun exposure.'
+      : highGrooming
+        ? 'Long or fluffy coats need regular brushing to reduce tangles and hairballs.'
+        : 'Short coats are usually easier to maintain with basic brushing and observation.',
+    activityZh: activeBreed
+      ? '适合准备更多互动、攀爬和玩具的家庭。'
+      : '日常互动和稳定陪伴更重要，不需要高强度运动安排。',
+    activityEn: activeBreed
+      ? 'Best for homes ready to offer play, climbing, and daily enrichment.'
+      : 'Steady companionship and daily interaction matter more than intense exercise.',
+    familyFitZh: familyFriendly
+      ? '整体更适合作为家庭陪伴型品种理解。'
+      : '建议结合具体猫咪性格和家庭节奏判断是否合适。',
+    familyFitEn: familyFriendly
+      ? 'Generally easier to understand as a family companion breed.'
+      : 'Match the individual cat and household rhythm before deciding.',
+    attentionZh: activeBreed
+      ? '需要较多陪伴和消耗精力的机会，避免长期无聊。'
+      : '保持固定互动和安静休息空间即可。',
+    attentionEn: activeBreed
+      ? 'Needs regular attention and energy outlets to avoid boredom.'
+      : 'A predictable routine and quiet resting spaces are usually enough.',
+    healthNoteZh: '这里只提供新手常识提醒，不替代兽医诊断；购买或领养前请了解可靠来源和健康背景。',
+    healthNoteEn: 'This is general beginner guidance, not veterinary diagnosis; check reliable sources and health background before adopting or buying.',
+  }
+}
+
 const markerProfileFor = (
   breed: BaseBreedOrigin,
   coatLength: CoatLength,
@@ -2208,6 +2330,129 @@ const externalStoryRegistry: Record<string, BreedExternalStory[]> = {
   ],
 }
 
+const routeSource = (id: string): BreedSourceLink => ({
+  labelZh: 'TICA 品种资料',
+  labelEn: 'TICA breed profile',
+  url: sourceUrlFor(id),
+  type: 'tica',
+})
+
+const explorationRouteRegistry: Record<string, BreedExplorationRoute> = {
+  siamese: {
+    titleZh: '暹罗猫的宫廷蓝眼航线',
+    titleEn: 'The blue-eyed Siamese route',
+    summaryZh: '从泰国旧称暹罗的传统猫出发，暹罗猫后来进入欧美育种与猫展体系，成为最容易被记住的重点色品种之一。',
+    summaryEn: 'Starting from old Siam, the Siamese route follows a colorpoint cat into Western breeding and show culture.',
+    stops: [
+      { labelZh: '暹罗 / 泰国', labelEn: 'Siam / Thailand', noteZh: '传统来源语境', noteEn: 'Traditional origin context', lat: 15.87, lon: 100.9925 },
+      { labelZh: '欧洲猫展', labelEn: 'European cat fancy', noteZh: '品种被更广泛记录和传播', noteEn: 'Breed identity spreads through cat fancy records', lat: 51.5072, lon: -0.1276 },
+    ],
+    sourceLinks: [routeSource('siamese')],
+  },
+  persian: {
+    titleZh: '波斯猫的长毛丝路',
+    titleEn: 'The Persian longhair route',
+    summaryZh: '波斯猫的故事围绕波斯地区意象、长毛外观和欧洲育种审美展开，是最适合做“从地图走进图鉴”的经典品种。',
+    summaryEn: 'The Persian route connects Persian-region imagery, long coat identity, and European show-cat refinement.',
+    stops: [
+      { labelZh: '波斯 / 伊朗', labelEn: 'Persia / Iran', noteZh: '历史地域意象', noteEn: 'Historical place identity', lat: 32.4279, lon: 53.688 },
+      { labelZh: '欧洲育种审美', labelEn: 'European refinement', noteZh: '长毛与圆脸成为记忆点', noteEn: 'Long coat and round expression become iconic', lat: 48.8566, lon: 2.3522 },
+    ],
+    sourceLinks: [routeSource('persian')],
+  },
+  'maine-coon': {
+    titleZh: '缅因猫的雪地港口路线',
+    titleEn: 'The Maine winter-port route',
+    summaryZh: '缅因猫的路线围绕美国缅因州、寒冷气候、农场和港口展开，大体型与蓬松尾巴像把地域气候穿在身上。',
+    summaryEn: 'The Maine Coon route follows cold New England farms and ports, where size and coat become part of the story.',
+    stops: [
+      { labelZh: '美国缅因州', labelEn: 'Maine, United States', noteZh: '寒冷地域和本土长毛猫记忆', noteEn: 'Cold-climate longhair identity', lat: 45.2538, lon: -69.4455 },
+      { labelZh: '北美家庭', labelEn: 'North American homes', noteZh: '温和巨猫形象被保留下来', noteEn: 'The gentle-giant image becomes memorable', lat: 39.8283, lon: -98.5795 },
+    ],
+    sourceLinks: [routeSource('maine-coon')],
+  },
+  ragdoll: {
+    titleZh: '布偶猫的加州温柔路线',
+    titleEn: 'The California-soft Ragdoll route',
+    summaryZh: '布偶猫从美国加州育种故事出发，名字本身就像体验描述：被抱起时柔软放松，容易形成强烈记忆点。',
+    summaryEn: 'The Ragdoll route starts in California and turns the breed name itself into a tactile memory.',
+    stops: [
+      { labelZh: '美国加州', labelEn: 'California, United States', noteZh: '现代品种发展地', noteEn: 'Modern breed development setting', lat: 36.7783, lon: -119.4179 },
+      { labelZh: '家庭陪伴场景', labelEn: 'Companion homes', noteZh: '温柔、长毛、重点色成为关键词', noteEn: 'Soft temperament, long coat, and colorpoint identity', lat: 39.8283, lon: -98.5795 },
+    ],
+    sourceLinks: [routeSource('ragdoll')],
+  },
+  bengal: {
+    titleZh: '孟加拉猫的小豹纹路线',
+    titleEn: 'The Bengal little-leopard route',
+    summaryZh: '孟加拉猫最强的记忆点是斑点和云纹。本路线强调它的野性视觉灵感，同时明确现代孟加拉仍是家猫品种。',
+    summaryEn: 'The Bengal route highlights spotted visual drama while keeping the domestic-cat context clear.',
+    stops: [
+      { labelZh: '亚洲豹猫意象', labelEn: 'Asian leopard cat imagery', noteZh: '视觉灵感来源之一', noteEn: 'One visual reference in the breed story', lat: 23.6978, lon: 120.9605 },
+      { labelZh: '美国育种线索', labelEn: 'United States breeding context', noteZh: '现代家猫品种身份', noteEn: 'Modern domestic breed identity', lat: 39.8283, lon: -98.5795 },
+    ],
+    sourceLinks: [routeSource('bengal')],
+  },
+  sphynx: {
+    titleZh: '斯芬克斯猫的无毛护理路线',
+    titleEn: 'The Sphynx skin-care route',
+    summaryZh: '斯芬克斯的探索重点不是“没有毛”本身，而是自然突变、选择育种和皮肤护理共同构成的品种理解。',
+    summaryEn: 'The Sphynx route links hairless appearance with mutation, selective breeding, and real care needs.',
+    stops: [
+      { labelZh: '加拿大线索', labelEn: 'Canada context', noteZh: '现代无毛品种故事常见起点', noteEn: 'A common modern hairless breed context', lat: 56.1304, lon: -106.3468 },
+      { labelZh: '护理提醒', labelEn: 'Care context', noteZh: '保暖、皮肤清洁和观察很重要', noteEn: 'Warmth, skin cleaning, and observation matter', lat: 45.4215, lon: -75.6972 },
+    ],
+    sourceLinks: [routeSource('sphynx')],
+  },
+  'british-shorthair': {
+    titleZh: '英短的圆脸城市路线',
+    titleEn: 'The British round-face route',
+    summaryZh: '英短的路线从英国本土猫记忆出发，最后落在圆脸、厚实短毛和稳定气质这些中文用户非常熟悉的关键词上。',
+    summaryEn: 'The British Shorthair route starts from British native-cat identity and lands on plush coat, round face, and calm presence.',
+    stops: [
+      { labelZh: '英国', labelEn: 'United Kingdom', noteZh: '本土短毛猫记忆', noteEn: 'Native shorthair identity', lat: 55.3781, lon: -3.436 },
+      { labelZh: '现代家庭图鉴', labelEn: 'Modern companion atlas', noteZh: '蓝猫、金渐层等叫法常在中文语境中出现', noteEn: 'Blue, golden, and shaded coat nicknames appear in Chinese search', lat: 51.5072, lon: -0.1276 },
+    ],
+    sourceLinks: [routeSource('british-shorthair')],
+  },
+  'turkish-angora': {
+    titleZh: '土耳其安哥拉的白色星轨',
+    titleEn: 'The Turkish Angora white-star route',
+    summaryZh: '土耳其安哥拉猫的路线围绕安卡拉、长毛白猫意象和优雅体态展开，适合做每日猫咪和故事星座的高记忆点品种。',
+    summaryEn: 'The Turkish Angora route ties Ankara, elegant longhair identity, and white-cat imagery into a memorable star path.',
+    stops: [
+      { labelZh: '安卡拉', labelEn: 'Ankara', noteZh: '土耳其安哥拉的地域记忆', noteEn: 'Place memory behind Turkish Angora', lat: 39.9334, lon: 32.8597 },
+      { labelZh: '猫咪星座', labelEn: 'Cat constellation', noteZh: '长毛、优雅、白色意象形成星轨', noteEn: 'Long coat, elegance, and white-cat imagery form the route', lat: 41.0082, lon: 28.9784 },
+    ],
+    sourceLinks: [routeSource('turkish-angora')],
+  },
+}
+
+const constellationStoriesFor = (
+  breed: BaseBreedOrigin,
+  story: VerifiedBreedStory,
+  externalStories: BreedExternalStory[],
+): BreedConstellationStory[] => [
+  {
+    type: story.sourceType,
+    titleZh: story.titleZh,
+    titleEn: story.titleEn,
+    summaryZh: story.bodyZh,
+    summaryEn: story.bodyEn,
+    url: story.sourceUrl,
+    sourceName: story.sourceName,
+  },
+  ...externalStories.slice(0, 2).map((externalStory) => ({
+    type: externalStory.sourceType,
+    titleZh: externalStory.titleZh,
+    titleEn: externalStory.titleEn,
+    summaryZh: externalStory.summaryZh,
+    summaryEn: externalStory.summaryEn,
+    url: externalStory.url,
+    sourceName: externalStory.sourceName || breed.ticaName,
+  })),
+]
+
 const curatedStories: Record<string, BreedStory> = {
   'american-shorthair': {
     titleZh: '从船舱捕鼠员到家庭猫',
@@ -2585,6 +2830,7 @@ const enhanceBreed = (breed: BaseBreedOrigin, index: number): BreedOrigin => {
   const photo = photoForBreed(breed, index)
   const story = storyFor({ ...breed, sourceUrl: ticaUrl }, zhName)
   const markerProfile = markerProfileFor(breed, coatLength)
+  const externalStories = externalStoryRegistry[breed.id] ?? []
   const enrichedPhoto = {
     ...photo,
     markerSrc: photo.markerSrc ?? photo.src,
@@ -2633,7 +2879,11 @@ const enhanceBreed = (breed: BaseBreedOrigin, index: number): BreedOrigin => {
     breedIconProfile: iconProfileFor(breed, markerProfile),
     readingSections: readingSectionsFor(breed, zhName, story, aliases),
     sourceLinks: sourceLinksFor({ ...breed, sourceUrl: ticaUrl }, enrichedPhoto, story),
-    externalStories: externalStoryRegistry[breed.id] ?? [],
+    externalStories,
+    personalityRadar: personalityRadarFor(breed, coatLength),
+    careGuide: careGuideFor(breed, coatLength),
+    explorationRoute: explorationRouteRegistry[breed.id],
+    constellationStories: constellationStoriesFor(breed, story, externalStories),
   }
 }
 
