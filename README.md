@@ -1,6 +1,6 @@
 # Cat Planet
 
-**猫咪星球** is an interactive 3D cat breed atlas built with React, TypeScript, Three.js, Drei, and GSAP. It maps cat breed origins onto a real WebGL globe and combines breed search, region filtering, photo markers, mobile browsing, and story links in one visual experience.
+**猫咪星球** is an interactive 3D cat breed atlas and exploration experience built with React, TypeScript, Three.js, Drei, and GSAP. It maps cat breed origins onto a real WebGL globe, then turns breed discovery into guardian-cat constellations, daily landings, personality tools, shareable Cat Planet cards, and story/video reading paths.
 
 Live demo:
 
@@ -15,6 +15,10 @@ https://qq598516797-dotcom.github.io/cat-planet/
 ### Breed Stories And Videos
 
 ![Cat Planet breed stories and videos](docs/screenshots/story-highlight.png)
+
+### Guardian Cat Card
+
+![Cat Planet guardian card](docs/screenshots/guardian-card-showcase.png)
 
 ### Breed Detail Reading View
 
@@ -33,7 +37,11 @@ https://qq598516797-dotcom.github.io/cat-planet/
 - Chinese and English UI modes.
 - Region shortcuts for Global, Asia, Europe, North America, Middle East, and Africa/Oceania.
 - Breed detail pages with photos, origin notes, common names, atlas facts, stories, and external video/story links.
-- GSAP-powered intro animation and interface motion.
+- Guardian cat constellation: choose a birthday, reveal a zodiac-matched cat, and read why the match fits.
+- Shareable Cat Planet postcard cards with front/back layouts, real cat photos, coordinates, keywords, and favorite-breed stamps.
+- Daily Cat landing card to give the atlas a lightweight reason to revisit.
+- Personality radar, beginner care notes, match quiz, and breed comparison tools.
+- GSAP-powered intro animation, constellation reveal, postcard reveal, hover polish, and smoother marker motion.
 - Responsive layouts for desktop and mobile.
 
 ## Tech Stack
@@ -80,9 +88,11 @@ Breed names are primarily referenced from TICA breed information. Origin coordin
 
 ## Project Status
 
-This is a public MVP preview. Planned improvements include:
+This is a public MVP preview with the core exploration loop in place: browse the 3D globe, reveal a guardian cat, save a Cat Planet card, compare breeds, and continue into stories/videos.
+
+Planned improvements include:
 
 - Adding more verified breed stories, news links, and video references.
-- Improving mobile reading and marker interaction.
+- Improving mobile reading, share-card export polish, and marker interaction.
 - Further optimizing marker clustering and animation performance.
-- Adding more visual filters for exploring breeds.
+- Adding more constellation explanations, richer recommendation logic, and visual filters for exploring breeds.
