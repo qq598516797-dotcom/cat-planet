@@ -999,7 +999,7 @@ export const useCatPlanetStore = create<CatPlanetState>((set) => ({
   language: 'zh',
   coatFilter: 'all',
   atlasKindFilter: 'all',
-  activeExperience: 'passport',
+  activeExperience: 'atlas',
   compareBreedIds: [],
   favoriteBreedIds: readStoredList(favoriteStorageKey),
   dailyBreedId: getDailyBreedId(),

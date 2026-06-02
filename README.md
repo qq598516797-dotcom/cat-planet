@@ -30,7 +30,7 @@ https://qq598516797-dotcom.github.io/cat-planet/
 
 ## Current Focus
 
-- Cat Home is now the first surface users see.
+- Cat Home and the feeding interaction are now shown first in the project showcase.
 - One active home cat can be fed, groomed, cleaned, played with, rested, changed, or removed.
 - Daily wishes connect the mini-game back to the planet: explore a region, find a personality match, read a story, favorite a breed, or compare cats.
 - GSAP powers the visible care feedback: food motion, cat movement, room shine, toy motion, reward particles, intro animation, constellation reveal, and smooth UI transitions.
