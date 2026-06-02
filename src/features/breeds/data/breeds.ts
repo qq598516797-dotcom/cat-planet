@@ -8,6 +8,15 @@ export type Region =
 
 export type CoordinateConfidence = 'high' | 'medium' | 'low'
 export type CoatLength = 'short' | 'long' | 'hairless' | 'rex' | 'mixed'
+export type AtlasKind = 'formalBreed' | 'localDomestic' | 'coatPattern'
+export type AtlasKindFilter = 'all' | 'formalBreed' | 'localAndPattern'
+export type PersonalityZoneId =
+  | 'affectionate'
+  | 'active'
+  | 'calm'
+  | 'beginner'
+  | 'grooming'
+  | 'lowShedding'
 export type MarkerSize = 'compact' | 'standard' | 'large' | 'low'
 export type MarkerEarStyle = 'upright' | 'large' | 'folded' | 'curled'
 export type MarkerTailStyle = 'normal' | 'short' | 'plume'
@@ -191,10 +200,30 @@ export interface BreedConstellationStory {
   sourceName: string
 }
 
+export interface PassportStamp {
+  id: string
+  labelZh: string
+  labelEn: string
+  region: Region
+  icon: string
+}
+
+export interface PersonalityZone {
+  id: PersonalityZoneId
+  labelZh: string
+  labelEn: string
+  descriptionZh: string
+  descriptionEn: string
+  icon: string
+}
+
 interface BaseBreedOrigin {
   id: string
   ticaName: string
   zhName: string
+  atlasKind?: AtlasKind
+  classificationNoteZh?: string
+  classificationNoteEn?: string
   originLabel: string
   countries: string[]
   lat: number
@@ -208,6 +237,9 @@ interface BaseBreedOrigin {
 }
 
 export interface BreedOrigin extends BaseBreedOrigin {
+  atlasKind: AtlasKind
+  classificationNoteZh: string
+  classificationNoteEn: string
   zhAliases: string[]
   searchTokens: string[]
   commonChineseSearches: string[]
@@ -1326,6 +1358,114 @@ const baseBreeds: BaseBreedOrigin[] = [
     traits: ['small', 'bobtail', 'compact'],
     sourceUrl: ticaBreedSource,
   },
+  {
+    id: 'chinese-domestic-cat',
+    ticaName: 'Chinese Domestic Cat',
+    zhName: '中华田园猫',
+    atlasKind: 'localDomestic',
+    classificationNoteZh: '中华田园猫是中国本土家猫的日常统称，展示的是本土群体和陪伴语境，不等同于单一血统登记品种。',
+    classificationNoteEn: 'Chinese Domestic Cat is a common umbrella term for local domestic cats in China; this entry represents a local population context, not one registry bloodline.',
+    originLabel: 'China',
+    countries: ['CN'],
+    lat: 35.8617,
+    lon: 104.1954,
+    region: 'Asia',
+    status: 'Local domestic population',
+    confidence: 'low',
+    summary: 'A local domestic cat population familiar across Chinese cities, towns, and villages.',
+    traits: ['local domestic cat', 'adaptable', 'varied coats'],
+    sourceUrl: 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E7%94%B0%E5%9C%92%E8%B2%93',
+  },
+  {
+    id: 'chinese-li-hua',
+    ticaName: 'Chinese Li Hua / Dragon Li',
+    zhName: '狸花猫',
+    atlasKind: 'localDomestic',
+    classificationNoteZh: '日常中文里的“狸花猫”多指棕色虎斑本土猫；登记品种语境中的 Chinese Li Hua / Dragon Li 更窄，本条会同时说明这两层含义。',
+    classificationNoteEn: 'In everyday Chinese, Li Hua often means a brown tabby local cat; the registered Chinese Li Hua / Dragon Li context is narrower, so this entry keeps both meanings visible.',
+    originLabel: 'China',
+    countries: ['CN'],
+    lat: 35.8617,
+    lon: 104.1954,
+    region: 'Asia',
+    status: 'Local domestic / registered context',
+    confidence: 'low',
+    summary: 'A Chinese tabby local-cat entry connected with the Li Hua / Dragon Li naming context.',
+    traits: ['brown tabby', 'local cat', 'alert'],
+    sourceUrl: 'https://en.wikipedia.org/wiki/Dragon_Li',
+  },
+  {
+    id: 'calico-cat',
+    ticaName: 'Calico Cat',
+    zhName: '三花猫',
+    atlasKind: 'coatPattern',
+    classificationNoteZh: '三花猫是常见三色花色类型，不是独立血统品种；它可以出现在不同品种或家猫群体中。',
+    classificationNoteEn: 'Calico describes a tricolor coat pattern, not an independent breed; it can appear in different breeds or domestic cat populations.',
+    originLabel: 'Global coat pattern',
+    countries: ['Global'],
+    lat: 0,
+    lon: 0,
+    region: 'Asia',
+    status: 'Coat pattern',
+    confidence: 'low',
+    summary: 'A tricolor coat pattern, usually white with orange and black patches.',
+    traits: ['tricolor coat', 'coat pattern', 'usually female'],
+    sourceUrl: 'https://en.wikipedia.org/wiki/Calico_cat',
+  },
+  {
+    id: 'tuxedo-cat',
+    ticaName: 'Tuxedo Cat',
+    zhName: '奶牛猫',
+    atlasKind: 'coatPattern',
+    classificationNoteZh: '奶牛猫通常指黑白双色或礼服感花色，不是独立血统品种；它的可爱点来自像穿小礼服的黑白分布。',
+    classificationNoteEn: 'Tuxedo cat describes a black-and-white bicolor pattern, not an independent breed; the name comes from the dressed-up look.',
+    originLabel: 'Global coat pattern',
+    countries: ['Global'],
+    lat: 0,
+    lon: 0,
+    region: 'Asia',
+    status: 'Coat pattern',
+    confidence: 'low',
+    summary: 'A black-and-white bicolor coat pattern often compared to a little tuxedo.',
+    traits: ['black and white', 'bicolor coat', 'playful nickname'],
+    sourceUrl: 'https://en.wikipedia.org/wiki/Bicolor_cat',
+  },
+  {
+    id: 'orange-tabby-cat',
+    ticaName: 'Orange Tabby Cat',
+    zhName: '橘猫',
+    atlasKind: 'coatPattern',
+    classificationNoteZh: '橘猫是橘色或橘白虎斑花色的日常叫法，不是独立血统品种；中文网络里的“橘猫”更多是一种花色和大众文化记忆。',
+    classificationNoteEn: 'Orange tabby is a color-and-tabby pattern term, not an independent breed; in Chinese internet culture, Ju Mao is mostly a coat-color memory.',
+    originLabel: 'Global coat pattern',
+    countries: ['Global'],
+    lat: 0,
+    lon: 0,
+    region: 'Asia',
+    status: 'Coat pattern',
+    confidence: 'low',
+    summary: 'An orange or orange-and-white tabby coat pattern familiar in domestic cats.',
+    traits: ['orange coat', 'tabby pattern', 'popular nickname'],
+    sourceUrl: 'https://en.wikipedia.org/wiki/Tabby_cat',
+  },
+  {
+    id: 'tortoiseshell-cat',
+    ticaName: 'Tortoiseshell Cat',
+    zhName: '玳瑁猫',
+    atlasKind: 'coatPattern',
+    classificationNoteZh: '玳瑁猫是黑、橘等颜色交织的花色类型，不是独立血统品种；每只玳瑁的斑纹都像独一无二的拼贴。',
+    classificationNoteEn: 'Tortoiseshell describes an interwoven black-and-orange coat pattern, not an independent breed; each pattern reads like a unique patchwork.',
+    originLabel: 'Global coat pattern',
+    countries: ['Global'],
+    lat: 0,
+    lon: 0,
+    region: 'Asia',
+    status: 'Coat pattern',
+    confidence: 'low',
+    summary: 'A mottled black-and-orange coat pattern known for highly individual markings.',
+    traits: ['tortoiseshell coat', 'mottled pattern', 'unique markings'],
+    sourceUrl: 'https://en.wikipedia.org/wiki/Tortoiseshell_cat',
+  },
 ]
 
 
@@ -1493,6 +1633,72 @@ const breedPhotoRegistry: Record<string, BreedPhoto> = {
     license: 'Wikimedia Commons',
     sourceUrl: 'https://commons.wikimedia.org/wiki/File:Scottish_fold_cat.jpg',
     objectPosition: '50% 32%',
+    fit: 'cover',
+    verifiedBreedPhoto: true,
+  },
+  'chinese-domestic-cat': {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/9/99/Cat_Named_Taiga_20150512.jpg',
+    altZh: '中华田园猫本土家猫参考照片',
+    altEn: 'Chinese domestic cat reference photograph.',
+    credit: 'Hal 0005 / Wikimedia Commons',
+    license: 'CC BY-SA 4.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:Cat_Named_Taiga_20150512.jpg',
+    objectPosition: '50% 36%',
+    fit: 'cover',
+    verifiedBreedPhoto: true,
+  },
+  'chinese-li-hua': {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/4/47/%E7%8B%B8%E8%8A%B1%E7%8C%AB_2.jpg',
+    altZh: '狸花猫真实照片',
+    altEn: 'Real Chinese Li Hua tabby cat photograph.',
+    credit: 'QUIET7175 / Wikimedia Commons',
+    license: 'CC BY-SA 4.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:%E7%8B%B8%E8%8A%B1%E7%8C%AB_2.jpg',
+    objectPosition: '50% 34%',
+    fit: 'cover',
+    verifiedBreedPhoto: true,
+  },
+  'calico-cat': {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Calico_cat%2C_-_Assisi%2C_Italy.jpg',
+    altZh: '三花猫真实照片',
+    altEn: 'Real calico cat photograph.',
+    credit: 'Terragio67 / Wikimedia Commons',
+    license: 'CC BY-SA 4.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:Calico_cat,_-_Assisi,_Italy.jpg',
+    objectPosition: '50% 35%',
+    fit: 'cover',
+    verifiedBreedPhoto: true,
+  },
+  'tuxedo-cat': {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Bicolor_tuxedo_cat_Matias.jpg',
+    altZh: '奶牛猫黑白花色真实照片',
+    altEn: 'Real tuxedo cat photograph.',
+    credit: 'AlexVaisanen / Wikimedia Commons',
+    license: 'CC BY-SA 4.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:Bicolor_tuxedo_cat_Matias.jpg',
+    objectPosition: '50% 34%',
+    fit: 'cover',
+    verifiedBreedPhoto: true,
+  },
+  'orange-tabby-cat': {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Orange_Tabby_Cat_2.jpg',
+    altZh: '橘色虎斑猫真实照片',
+    altEn: 'Real orange tabby cat photograph.',
+    credit: 'Kalel Tonatiuh / Wikimedia Commons',
+    license: 'CC BY-SA 3.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:Orange_Tabby_Cat_2.jpg',
+    objectPosition: '50% 38%',
+    fit: 'cover',
+    verifiedBreedPhoto: true,
+  },
+  'tortoiseshell-cat': {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Kira%2C_a_tortoise_shell_cat.jpg',
+    altZh: '玳瑁猫真实照片',
+    altEn: 'Real tortoiseshell cat photograph.',
+    credit: 'Ivanhercaz / Wikimedia Commons',
+    license: 'CC BY-SA 4.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:Kira,_a_tortoise_shell_cat.jpg',
+    objectPosition: '50% 35%',
     fit: 'cover',
     verifiedBreedPhoto: true,
   },
@@ -1665,6 +1871,12 @@ const curatedNames: Record<string, { zh: string; aliases: string[]; coat?: CoatL
   'snowshoe': { zh: '\u96ea\u978b\u732b', aliases: ['\u96ea\u9774\u732b'], coat: 'short' },
   'tennessee-rex': { zh: '田纳西卷毛猫', aliases: ['田纳西雷克斯'], coat: 'rex' },
   'toybob': { zh: '玩具短尾猫', aliases: ['迷你短尾猫'], coat: 'short' },
+  'chinese-domestic-cat': { zh: '中华田园猫', aliases: ['中华田园', '田园猫', '土猫', '本土猫', '家猫'], coat: 'mixed' },
+  'chinese-li-hua': { zh: '狸花猫', aliases: ['狸花', '中国狸花', '中华狸花猫', 'Dragon Li', 'Li Hua'], coat: 'short' },
+  'calico-cat': { zh: '三花猫', aliases: ['三花', '三色猫', '玳瑁白', '三色花猫'], coat: 'mixed' },
+  'tuxedo-cat': { zh: '奶牛猫', aliases: ['奶牛', '黑白猫', '礼服猫', '燕尾服猫'], coat: 'mixed' },
+  'orange-tabby-cat': { zh: '橘猫', aliases: ['橘子猫', '黄狸猫', '橘白', '橘色虎斑'], coat: 'short' },
+  'tortoiseshell-cat': { zh: '玳瑁猫', aliases: ['玳瑁', '玳瑁色', 'tortie'], coat: 'mixed' },
 }
 
 const fallbackZhName = (breed: BaseBreedOrigin) =>
@@ -1679,6 +1891,28 @@ const inferCoat = (breed: BaseBreedOrigin): CoatLength => {
   if (text.includes('longhair') || text.includes('longhaired') || text.includes('long coat')) return 'long'
   if (text.includes('shorthair') || text.includes('shorthaired') || text.includes('short coat')) return 'short'
   return 'mixed'
+}
+
+const atlasKindFor = (breed: BaseBreedOrigin): AtlasKind =>
+  breed.atlasKind ?? 'formalBreed'
+
+const defaultClassificationNote = (
+  atlasKind: AtlasKind,
+  language: 'zh' | 'en',
+) => {
+  if (atlasKind === 'localDomestic') {
+    return language === 'zh'
+      ? '本土家猫/自然群体展示条目，不等同于单一血统登记品种。'
+      : 'Local domestic or natural-population entry, not one registry bloodline.'
+  }
+  if (atlasKind === 'coatPattern') {
+    return language === 'zh'
+      ? '这是常见毛色/花色类型，不是独立血统品种。'
+      : 'This is a common coat color or pattern, not an independent bloodline breed.'
+  }
+  return language === 'zh'
+    ? '正式品种资料条目，主要依据 TICA 或可追溯品种资料展示。'
+    : 'Formal breed entry based on TICA or traceable breed references.'
 }
 
 const coatLabelZh: Record<CoatLength, string> = {
@@ -1698,8 +1932,10 @@ const coatLabelEn: Record<CoatLength, string> = {
 }
 
 const buildDetailFacts = (breed: BaseBreedOrigin, coatLength: CoatLength): BreedDetailFacts => ({
-  size: breed.traits.includes('large') || breed.summary.toLowerCase().includes('large') ? 'Large / \u5927\u578b' : 'Medium / \u4e2d\u7b49',
-  lifespan: '12-16 years / 12-16\u5e74',
+  size: atlasKindFor(breed) === 'coatPattern'
+    ? 'Varies by individual / 因个体而异'
+    : breed.traits.includes('large') || breed.summary.toLowerCase().includes('large') ? 'Large / \u5927\u578b' : 'Medium / \u4e2d\u7b49',
+  lifespan: atlasKindFor(breed) === 'coatPattern' ? 'Varies / 因个体而异' : '12-16 years / 12-16\u5e74',
   temperament: breed.traits.slice(0, 3),
   care: coatLength === 'long' ? 'Weekly brushing / \u5efa\u8bae\u6bcf\u5468\u68b3\u7406' : coatLength === 'hairless' ? 'Skin care / \u9700\u8981\u76ae\u80a4\u62a4\u7406' : 'Easy routine care / \u65e5\u5e38\u62a4\u7406\u8f83\u7b80\u5355',
   colors: breed.traits.slice(0, 2),
@@ -2026,6 +2262,12 @@ const iconOverrides: Record<string, Partial<BreedIconProfile>> = {
   'snowshoe': { badgeShape: 'ticket', baseColor: '#f7dfc8', secondaryColor: '#60453d', accentColor: '#4f362f', pattern: 'point', eyeColor: '#5fc5ff', signatureMark: 'shoe', shortCode: 'SNO' },
   'tennessee-rex': { badgeShape: 'scallop', coatVolume: 'rex', baseColor: '#f4bd86', secondaryColor: '#fff0c9', accentColor: '#925b2a', signatureMark: 'spark', shortCode: 'TRX' },
   toybob: { badgeShape: 'ticket', faceShape: 'small', baseColor: '#ffca82', secondaryColor: '#ffe8c5', accentColor: '#8b5625', signatureMark: 'bob', tailStyle: 'short', shortCode: 'TOB' },
+  'chinese-domestic-cat': { badgeShape: 'leaf', faceShape: 'round', baseColor: '#c99466', secondaryColor: '#ffe0b7', accentColor: '#654024', pattern: 'stripes', eyeColor: '#79c96b', signatureMark: 'leaf', shortCode: 'CDC' },
+  'chinese-li-hua': { badgeShape: 'shield', faceShape: 'wild', baseColor: '#ad7a4d', secondaryColor: '#f2c896', accentColor: '#3d281b', pattern: 'stripes', eyeColor: '#72c45e', signatureMark: 'spark', shortCode: 'LIH' },
+  'calico-cat': { badgeShape: 'scallop', faceShape: 'round', baseColor: '#fff3dc', secondaryColor: '#f79b4d', accentColor: '#2f2b2d', pattern: 'shaded', eyeColor: '#82c96d', signatureMark: 'heart', shortCode: 'CAL' },
+  'tuxedo-cat': { badgeShape: 'ticket', faceShape: 'round', baseColor: '#2f2f38', secondaryColor: '#ffffff', accentColor: '#ff8ab3', pattern: 'solid', eyeColor: '#f3bd49', signatureMark: 'diamond', shortCode: 'TUX' },
+  'orange-tabby-cat': { badgeShape: 'circle', faceShape: 'round', baseColor: '#ef8f35', secondaryColor: '#ffd286', accentColor: '#7a3f18', pattern: 'stripes', eyeColor: '#7dcf67', signatureMark: 'sun', shortCode: 'ORG' },
+  'tortoiseshell-cat': { badgeShape: 'moon', faceShape: 'heart', baseColor: '#3a302e', secondaryColor: '#d47a39', accentColor: '#f5c45f', pattern: 'shaded', eyeColor: '#83c86b', signatureMark: 'moon', shortCode: 'TOR' },
 }
 
 const iconProfileFor = (
@@ -2113,7 +2355,7 @@ const aliasExplanationOverrides: Record<string, string> = {
   'devon-rex': '“德文”是 Devon Rex 的常用简称；中文用户也会按卷毛、大耳朵等特征找到它。',
   sphynx: '“无毛猫”常被中文用户用来搜索 Sphynx，但无毛类还包括 Donskoy、Peterbald 等，本图鉴会按品种分开展示。',
   munchkin: '“矮脚”常被用来搜索 Munchkin；本图鉴保留这个入口，同时在详情里补充体型和护理语境。',
-  bengal: '“豹猫”是中文用户常用搜索词；在品种图鉴里通常对应 Bengal，但它仍是家猫品种，不等于野生豹猫。',
+  bengal: '“豹猫”是中文用户常用搜索词；在猫咪图鉴里通常对应 Bengal，但它仍是家猫品种，不等于野生豹猫。',
   persian: '“波斯”是 Persian 的常用中文简称；搜索长毛、圆脸等特征时也会回到这个经典长毛品种。',
   'scottish-fold': '“折耳”常被中文用户用来搜索 Scottish Fold；本图鉴会把可爱外形和健康背景一起展示。',
   'oriental-shorthair': '“东短”是部分猫友对东方短毛猫的简称，本图鉴统一归到 Oriental Shorthair。',
@@ -2141,32 +2383,35 @@ const sourceLinksFor = (
   breed: BaseBreedOrigin,
   photo: BreedPhoto,
   story: VerifiedBreedStory,
-): BreedSourceLink[] => [
-  {
-    labelZh: 'TICA \u54c1\u79cd\u8d44\u6599',
-    labelEn: 'TICA breed profile',
-    url: breed.sourceUrl,
-    type: 'tica',
-  },
-  {
-    labelZh: '\u53ef\u67e5\u6545\u4e8b\u6765\u6e90',
-    labelEn: 'Traceable story source',
-    url: story.sourceUrl,
-    type: 'story',
-  },
-  {
-    labelZh: '\u56fe\u7247\u6765\u6e90',
-    labelEn: 'Photo source',
-    url: photo.sourceUrl,
-    type: 'photo',
-  },
-  {
-    labelZh: 'TICA \u603b\u54c1\u79cd\u9875',
-    labelEn: 'TICA all breeds',
-    url: ticaBreedSource,
-    type: 'reference',
-  },
-]
+): BreedSourceLink[] => {
+  const isFormalBreed = (breed.atlasKind ?? 'formalBreed') === 'formalBreed'
+  return [
+    {
+      labelZh: isFormalBreed ? 'TICA \u54c1\u79cd\u8d44\u6599' : '分类资料来源',
+      labelEn: isFormalBreed ? 'TICA breed profile' : 'Classification source',
+      url: breed.sourceUrl,
+      type: isFormalBreed ? 'tica' : 'reference',
+    },
+    {
+      labelZh: '\u53ef\u67e5\u6545\u4e8b\u6765\u6e90',
+      labelEn: 'Traceable story source',
+      url: story.sourceUrl,
+      type: 'story',
+    },
+    {
+      labelZh: '\u56fe\u7247\u6765\u6e90',
+      labelEn: 'Photo source',
+      url: photo.sourceUrl,
+      type: 'photo',
+    },
+    ...(isFormalBreed ? [{
+      labelZh: 'TICA \u603b\u54c1\u79cd\u9875',
+      labelEn: 'TICA all breeds',
+      url: ticaBreedSource,
+      type: 'reference' as const,
+    }] : []),
+  ]
+}
 
 const youtubeSearch = (query: string) =>
   `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`
@@ -2683,6 +2928,84 @@ type VerifiedStorySeed = Pick<
 }
 
 const verifiedStorySeeds: Record<string, VerifiedStorySeed> = {
+  'chinese-domestic-cat': {
+    titleZh: '不是血统证书里的名字，而是很多人的家门口记忆',
+    titleEn: 'Not a pedigree label, but a familiar doorstep memory',
+    bodyZh: '中华田园猫更像一个亲切的统称：小区楼下、乡村院子、店门口晒太阳的本土家猫，都可能被放进这个叫法里。它的故事不靠血统证书成立，而是靠和中国日常生活长期相处留下的记忆。',
+    bodyEn: 'Chinese Domestic Cat is an affectionate umbrella term for local cats seen around apartments, villages, shops, and homes. Its story is not a single pedigree record, but a long everyday relationship with people in China.',
+    tone: 'touching',
+    type: 'culture',
+    sourceType: 'reference',
+    sourceName: 'Wikipedia Chinese Domestic Cat entry',
+    sourceUrl: 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E8%8F%AF%E7%94%B0%E5%9C%92%E8%B2%93',
+    evidenceNoteZh: '本条使用公开百科资料解释“中华田园猫”的日常统称语境，并明确它不是单一血统登记品种。',
+    evidenceNoteEn: 'This entry uses a public reference to explain Chinese Domestic Cat as an everyday umbrella term rather than one registry breed.',
+  },
+  'chinese-li-hua': {
+    titleZh: '狸花：从日常虎斑到 Dragon Li 语境',
+    titleEn: 'Li Hua: from everyday tabby name to Dragon Li context',
+    bodyZh: '中文里说“狸花猫”，很多时候是在说棕色虎斑本土猫；而 Chinese Li Hua / Dragon Li 作为登记语境更具体。把这两层放在一起看，用户就不会把所有虎斑猫都误认为同一个血统品种，也能保留“狸花”这个熟悉叫法的亲切感。',
+    bodyEn: 'In Chinese, Li Hua often means a familiar brown tabby local cat, while Chinese Li Hua / Dragon Li is a narrower registry context. Keeping both visible prevents every tabby from being treated as one bloodline while preserving the familiar name.',
+    tone: 'history',
+    type: 'culture',
+    sourceType: 'reference',
+    sourceName: 'Dragon Li reference entry',
+    sourceUrl: 'https://en.wikipedia.org/wiki/Dragon_Li',
+    evidenceNoteZh: '本条依据 Dragon Li / Chinese Li Hua 公开资料，并补充中文日常“狸花”叫法和登记品种语境的差异。',
+    evidenceNoteEn: 'This entry uses public Dragon Li / Chinese Li Hua references and notes the everyday Chinese naming distinction.',
+  },
+  'calico-cat': {
+    titleZh: '三花不是品种，是把三种颜色穿在身上的花色',
+    titleEn: 'Calico is not a breed; it is a tricolor coat',
+    bodyZh: '三花猫最容易让人产生“这是一种品种”的错觉，但它其实是三色花色类型。更有趣的是，三花花色常和性别遗传联系在一起，所以它既有科普点，也有很强的日常辨识度。',
+    bodyEn: 'Calico is often mistaken for a breed, but it is a tricolor coat pattern. Its strong visual identity and genetics-related sex pattern make it both recognizable and educational.',
+    tone: 'history',
+    type: 'culture',
+    sourceType: 'reference',
+    sourceName: 'Calico cat reference entry',
+    sourceUrl: 'https://en.wikipedia.org/wiki/Calico_cat',
+    evidenceNoteZh: '来源说明三花是 coat pattern，不是独立品种；本图鉴据此把它放在“本土与花色猫”分区。',
+    evidenceNoteEn: 'The source describes calico as a coat pattern, so the atlas places it in the local and coat-pattern section.',
+  },
+  'tuxedo-cat': {
+    titleZh: '奶牛猫的小礼服感，来自黑白双色花纹',
+    titleEn: 'The tuxedo look comes from black-and-white bicolor markings',
+    bodyZh: '奶牛猫的趣味不在血统，而在黑白分布带来的“小礼服”画面：胸前像白衬衫，身上像黑外套。它可以出现在不同家猫和品种猫身上，所以这里把它当作花色类型，而不是品种。',
+    bodyEn: 'The tuxedo charm comes from black-and-white bicolor markings that can look like a little suit. It can appear in many domestic or breed cats, so this atlas treats it as a coat pattern rather than a breed.',
+    tone: 'funny',
+    type: 'culture',
+    sourceType: 'reference',
+    sourceName: 'Bicolor cat reference entry',
+    sourceUrl: 'https://en.wikipedia.org/wiki/Bicolor_cat',
+    evidenceNoteZh: '来源用于核对黑白双色花色语境；“奶牛猫/礼服猫”在本条中作为花色俗称展示。',
+    evidenceNoteEn: 'The source is used for bicolor coat context; tuxedo is shown here as a coat nickname.',
+  },
+  'orange-tabby-cat': {
+    titleZh: '橘猫的记忆点，是花色也是网络文化',
+    titleEn: 'Orange tabby is both a coat memory and a culture joke',
+    bodyZh: '中文用户说“橘猫”，通常不是在问一个独立品种，而是在指橘色或橘白虎斑猫。它之所以有强记忆点，除了颜色醒目，也因为网络文化里关于橘猫的梗让这种花色变得很容易被记住。',
+    bodyEn: 'When Chinese users search Ju Mao, they usually mean an orange or orange-and-white tabby, not a separate breed. The strong memory comes from the color and from internet culture around orange cats.',
+    tone: 'funny',
+    type: 'culture',
+    sourceType: 'reference',
+    sourceName: 'Tabby cat reference entry',
+    sourceUrl: 'https://en.wikipedia.org/wiki/Tabby_cat',
+    evidenceNoteZh: '来源用于解释 tabby 花纹；本条把“橘猫”作为橘色虎斑/橘白花色入口处理。',
+    evidenceNoteEn: 'The source explains tabby pattern context; this entry treats orange tabby as a color-pattern doorway.',
+  },
+  'tortoiseshell-cat': {
+    titleZh: '玳瑁像一张独一无二的拼贴画',
+    titleEn: 'Tortoiseshell looks like a one-of-a-kind patchwork',
+    bodyZh: '玳瑁猫不是某个独立品种，而是黑色、橘色等颜色交织形成的花色类型。它好看的地方在于没有两只会完全一样：每只玳瑁都像把小小的秋天拼贴在身上。',
+    bodyEn: 'Tortoiseshell is not a separate breed; it is an interwoven coat pattern of black, orange, and related tones. Its charm is individuality: no two torties look exactly the same.',
+    tone: 'touching',
+    type: 'culture',
+    sourceType: 'reference',
+    sourceName: 'Tortoiseshell cat reference entry',
+    sourceUrl: 'https://en.wikipedia.org/wiki/Tortoiseshell_cat',
+    evidenceNoteZh: '来源说明玳瑁是 coat coloring / pattern；本图鉴据此避免把它写成血统品种。',
+    evidenceNoteEn: 'The source describes tortoiseshell as coat coloring or pattern, so the atlas avoids presenting it as a bloodline breed.',
+  },
   abyssinian: { titleZh: '像从古画里跑出来的阿比', titleEn: 'The Abyssinian that looks painted by history', bodyZh: '阿比西尼亚猫常被资料描述成带有古老气质的 ticked coat 猫；这个小故事的重点不是神秘传说，而是它从东非意象到英国育种线索的迁移感，像一只把旅途颜色穿在身上的猫。', bodyEn: 'Abyssinians are often introduced through an ancient-looking ticked coat and a route from East African imagery into British refinement, making the breed feel like a travel story in fur.', tone: 'legend' },
   aegean: { titleZh: '爱琴海岛上的自然猫', titleEn: 'A natural cat from the Aegean islands', bodyZh: '爱琴猫的可爱在于它不是被包装出来的“网红设定”，而是和希腊岛屿生活联系在一起的自然品种；读它的故事像看到一只在海边小镇熟门熟路讨摸的猫。', bodyEn: 'The Aegean reads less like a manufactured trend and more like a natural island cat shaped by Greek coastal life.', tone: 'touching' },
   'american-bobtail': { titleZh: 'Yodi 留下的短尾线索', titleEn: 'Yodi and the bobtail clue', bodyZh: 'American Bobtail 的现代故事常从一只名叫 Yodi 的短尾猫说起；这个名字让短尾不只是外形标签，更像猫友把一次偶然发现认真记录了下来。', bodyEn: 'The modern American Bobtail story is often linked with a short-tailed cat named Yodi, turning the tail into a memorable discovery note.', tone: 'legend' },
@@ -2821,6 +3144,7 @@ const photoForBreed = (breed: BaseBreedOrigin, index: number): BreedPhoto =>
   breedPhotoRegistry[breed.id] ?? ticaPhotoForBreed(breed) ?? fallbackPhotoFor(breed, index)
 
 const enhanceBreed = (breed: BaseBreedOrigin, index: number): BreedOrigin => {
+  const atlasKind = atlasKindFor(breed)
   const zhName = fallbackZhName(breed)
   const aliases = curatedNames[breed.id]?.aliases ?? []
   const coatLength = inferCoat(breed)
@@ -2839,9 +3163,17 @@ const enhanceBreed = (breed: BaseBreedOrigin, index: number): BreedOrigin => {
     altEn: `Real cat photo reference for ${breed.ticaName}`,
   }
   const commonChineseSearches = Array.from(new Set([zhName, ...aliases]))
+  const classificationTokens = atlasKind === 'formalBreed'
+    ? ['formal breed', '正式品种']
+    : atlasKind === 'localDomestic'
+      ? ['local domestic cat', '本土猫', '本土与花色猫']
+      : ['coat pattern', '花色猫', '花色类型', '本土与花色猫']
 
   return {
     ...breed,
+    atlasKind,
+    classificationNoteZh: breed.classificationNoteZh ?? defaultClassificationNote(atlasKind, 'zh'),
+    classificationNoteEn: breed.classificationNoteEn ?? defaultClassificationNote(atlasKind, 'en'),
     zhName,
     sourceUrl: ticaUrl,
     zhAliases: aliases,
@@ -2857,16 +3189,23 @@ const enhanceBreed = (breed: BaseBreedOrigin, index: number): BreedOrigin => {
       ...breed.traits,
       coatLabelZh[coatLength],
       coatLabelEn[coatLength],
+      ...classificationTokens,
     ].map((token) => token.toLowerCase()),
     localized: {
       zh: {
         name: zhName,
-        summary: `${zhName}\u6e90\u81ea ${breed.originLabel}\uff0c\u5728 TICA \u56fe\u9274\u4e2d\u4ee5 ${zhTraits.slice(0, 2).join('\u3001')} \u7b49\u7279\u5f81\u88ab\u8bb0\u4f4f\u3002`,
+        summary: atlasKind === 'coatPattern'
+          ? `${zhName} 是常见毛色/花色类型，不是独立血统品种；本图鉴用它帮助用户查找熟悉的日常叫法。`
+          : atlasKind === 'localDomestic'
+            ? `${zhName} 归入本土与花色猫分区，展示 ${breed.originLabel} 的本土家猫/自然群体语境。`
+            : `${zhName}\u6e90\u81ea ${breed.originLabel}\uff0c\u5728 TICA \u56fe\u9274\u4e2d\u4ee5 ${zhTraits.slice(0, 2).join('\u3001')} \u7b49\u7279\u5f81\u88ab\u8bb0\u4f4f\u3002`,
         traits: zhTraits,
       },
       en: {
         name: breed.ticaName,
-        summary: breed.summary,
+        summary: atlasKind === 'coatPattern'
+          ? `${breed.ticaName} is a coat pattern entry, not an independent breed. It is included so familiar everyday cat names are searchable.`
+          : breed.summary,
         traits: enTraits,
       },
     },
@@ -2953,6 +3292,18 @@ export const getBreedSearchHint = (
       : `Matched origin: ${breed.originLabel}`
   }
 
+  if (breed.atlasKind === 'coatPattern') {
+    return language === 'zh'
+      ? '命中花色类型：这是毛色/花色入口，不是独立血统品种'
+      : 'Matched coat pattern: this is not an independent breed'
+  }
+
+  if (breed.atlasKind === 'localDomestic') {
+    return language === 'zh'
+      ? '命中本土猫条目：展示本土群体和日常叫法'
+      : 'Matched local domestic entry'
+  }
+
   return null
 }
 
@@ -2990,18 +3341,37 @@ export const getVisibleBreeds = (
   region: Region,
   query: string,
   coatFilter: 'all' | CoatLength = 'all',
+  atlasKindFilter: AtlasKindFilter = 'all',
 ) => {
   const normalizedQuery = query.trim().toLowerCase()
 
   return breeds
     .filter((breed) => {
-      const matchesRegion = region === 'Global' || breed.region === region
+      const isLocalAndPatternEntry =
+        breed.atlasKind === 'localDomestic' || breed.atlasKind === 'coatPattern'
+      const matchesRegion =
+        normalizedQuery.length > 0
+        || region === 'Global'
+        || (atlasKindFilter === 'localAndPattern' && isLocalAndPatternEntry)
+        || (
+          atlasKindFilter !== 'localAndPattern'
+          && breed.atlasKind !== 'coatPattern'
+          && breed.region === region
+        )
       const matchesCoat = coatFilter === 'all' || breed.coatLength === coatFilter
+      const matchesAtlasKind =
+        normalizedQuery.length > 0
+        || atlasKindFilter === 'all'
+        || (atlasKindFilter === 'formalBreed' && breed.atlasKind === 'formalBreed')
+        || (
+          atlasKindFilter === 'localAndPattern'
+          && (breed.atlasKind === 'localDomestic' || breed.atlasKind === 'coatPattern')
+        )
       const matchesQuery =
         normalizedQuery.length === 0 ||
         breed.searchTokens.some((token) => fuzzyIncludes(token, normalizedQuery))
 
-      return matchesRegion && matchesCoat && matchesQuery
+      return matchesRegion && matchesCoat && matchesAtlasKind && matchesQuery
     })
     .sort((a, b) => {
       const rankDelta =
@@ -3010,3 +3380,130 @@ export const getVisibleBreeds = (
       return a.ticaName.localeCompare(b.ticaName)
     })
 }
+
+export const getVisibleMarkerBreeds = (
+  region: Region,
+  query: string,
+  coatFilter: 'all' | CoatLength = 'all',
+  atlasKindFilter: AtlasKindFilter = 'all',
+) =>
+  getVisibleBreeds(region, query, coatFilter, atlasKindFilter)
+    .filter((breed) => breed.atlasKind !== 'coatPattern')
+
+export const passportStamps: PassportStamp[] = [
+  { id: 'stamp-global', labelZh: '全球探索', labelEn: 'Global Explorer', region: 'Global', icon: '✦' },
+  { id: 'stamp-asia', labelZh: '亚洲猫域', labelEn: 'Asia Catlands', region: 'Asia', icon: '樱' },
+  { id: 'stamp-europe', labelZh: '欧洲猫堡', labelEn: 'Europe Cat Castle', region: 'Europe', icon: '冠' },
+  { id: 'stamp-north-america', labelZh: '北美森林港', labelEn: 'North America Forest Port', region: 'North America', icon: '松' },
+  { id: 'stamp-middle-east', labelZh: '中东古道', labelEn: 'Middle East Heritage Route', region: 'Middle East', icon: '月' },
+  { id: 'stamp-africa-oceania', labelZh: '非洲与大洋洲星岸', labelEn: 'Africa & Oceania Star Coast', region: 'Africa/Oceania', icon: '星' },
+]
+
+export const personalityZones: PersonalityZone[] = [
+  {
+    id: 'affectionate',
+    labelZh: '黏人星区',
+    labelEn: 'Affection Galaxy',
+    descriptionZh: '更重视陪伴、互动和亲近感，适合想要情绪回应的用户。',
+    descriptionEn: 'Cats with stronger companion energy and people-facing interaction.',
+    icon: '♡',
+  },
+  {
+    id: 'active',
+    labelZh: '活跃星区',
+    labelEn: 'Active Orbit',
+    descriptionZh: '喜欢探索、跳跃和游戏，更适合愿意布置爬架与互动的人。',
+    descriptionEn: 'Playful explorers that benefit from climbing, play, and enrichment.',
+    icon: '↗',
+  },
+  {
+    id: 'calm',
+    labelZh: '安静星区',
+    labelEn: 'Quiet Nebula',
+    descriptionZh: '节奏更慢、更稳定，适合偏安静的家庭氛围。',
+    descriptionEn: 'Steadier cats for calmer home rhythms.',
+    icon: '☾',
+  },
+  {
+    id: 'beginner',
+    labelZh: '新手友好星区',
+    labelEn: 'Beginner Starfield',
+    descriptionZh: '护理和相处门槛更低，适合第一次认真了解猫咪的人。',
+    descriptionEn: 'Approachable matches for first-time cat explorers.',
+    icon: '✓',
+  },
+  {
+    id: 'grooming',
+    labelZh: '高护理星区',
+    labelEn: 'Grooming Comet',
+    descriptionZh: '毛发或皮肤护理更有仪式感，适合愿意投入时间的人。',
+    descriptionEn: 'Cats whose coat or skin care deserves more routine attention.',
+    icon: '✺',
+  },
+  {
+    id: 'lowShedding',
+    labelZh: '低掉毛星区',
+    labelEn: 'Low-Shed Moon',
+    descriptionZh: '更适合在意清洁和掉毛感受的用户，但仍需要日常护理。',
+    descriptionEn: 'Better starting points for users sensitive to shedding.',
+    icon: '◌',
+  },
+]
+
+const regionStampId: Record<Exclude<Region, 'Global'>, string> = {
+  Asia: 'stamp-asia',
+  Europe: 'stamp-europe',
+  'North America': 'stamp-north-america',
+  'Middle East': 'stamp-middle-east',
+  'Africa/Oceania': 'stamp-africa-oceania',
+}
+
+export const passportRegionForBreed = (breed: BreedOrigin) =>
+  breed.atlasKind === 'coatPattern' ? null : regionStampId[breed.region]
+
+export const getPassportStampById = (id: string) =>
+  passportStamps.find((stamp) => stamp.id === id) ?? null
+
+export const personalityZoneIdsForBreed = (breed: BreedOrigin): PersonalityZoneId[] => {
+  const zones: PersonalityZoneId[] = []
+  const radar = breed.personalityRadar
+
+  if (radar.affectionate >= 4) zones.push('affectionate')
+  if (radar.active >= 4) zones.push('active')
+  if (radar.calm >= 4) zones.push('calm')
+  if (radar.beginnerFriendly >= 4) zones.push('beginner')
+  if (radar.grooming >= 4) zones.push('grooming')
+  if (radar.shedding <= 2) zones.push('lowShedding')
+
+  if (zones.length === 0) {
+    const strongest = (Object.entries(radar) as Array<[keyof typeof radar, number]>)
+      .sort((a, b) => b[1] - a[1])[0]?.[0]
+    if (strongest === 'active') return ['active']
+    if (strongest === 'calm') return ['calm']
+    if (strongest === 'beginnerFriendly') return ['beginner']
+    if (strongest === 'grooming' || strongest === 'shedding') return ['grooming']
+    return ['affectionate']
+  }
+
+  return zones.slice(0, 2)
+}
+
+export const breedsForPersonalityZone = (zoneId: PersonalityZoneId, limit = 8) =>
+  breeds
+    .filter((breed) => personalityZoneIdsForBreed(breed).includes(zoneId))
+    .sort((a, b) => {
+      const keyForZone: Record<PersonalityZoneId, keyof BreedPersonalityRadar> = {
+        affectionate: 'affectionate',
+        active: 'active',
+        calm: 'calm',
+        beginner: 'beginnerFriendly',
+        grooming: 'grooming',
+        lowShedding: 'shedding',
+      }
+      const key = keyForZone[zoneId]
+      const aValue = zoneId === 'lowShedding' ? 6 - a.personalityRadar[key] : a.personalityRadar[key]
+      const bValue = zoneId === 'lowShedding' ? 6 - b.personalityRadar[key] : b.personalityRadar[key]
+      if (bValue !== aValue) return bValue - aValue
+      return a.ticaName.localeCompare(b.ticaName)
+    })
+    .slice(0, limit)

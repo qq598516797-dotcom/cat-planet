@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import * as THREE from 'three'
 import {
-  getVisibleBreeds,
+  getVisibleMarkerBreeds,
+  passportRegionForBreed,
   type BreedOrigin,
 } from '../../breeds/data/breeds'
 import { regionTargets } from '../data/regionTargets'
@@ -216,6 +217,7 @@ function PhotoCluster({
   const setHoveredBreedId = useCatPlanetStore((state) => state.setHoveredBreedId)
   const setTooltipPosition = useCatPlanetStore((state) => state.setTooltipPosition)
   const flyTo = useCatPlanetStore((state) => state.flyTo)
+  const recordBreedExploration = useCatPlanetStore((state) => state.recordBreedExploration)
   const representative = cluster.representativeBreed
   const directBreed = cluster.breeds.length === 1 ? cluster.breeds[0] : null
   const hasVerifiedPhoto = Boolean(representative.photo.verifiedBreedPhoto)
@@ -237,7 +239,22 @@ function PhotoCluster({
 
   const selectAndFlyToBreed = (breed: BreedOrigin, event: { clientX: number; clientY: number }) => {
     selectBreed(breed.id)
+    recordBreedExploration(breed.id, passportRegionForBreed(breed))
     showTooltip(breed, event)
+    if (breed.atlasKind === 'coatPattern') {
+      flyTo(
+        {
+          ...regionTargets.Global,
+          label: breed.ticaName,
+          lat: regionTargets.Global.lat,
+          lon: regionTargets.Global.lon,
+          distance: 3.55,
+        },
+        breed.id,
+      )
+      return
+    }
+
     flyTo(
       {
         ...regionTargets[breed.region],
@@ -321,6 +338,7 @@ export function BreedMarkers() {
   const activeRegion = useCatPlanetStore((state) => state.activeRegion)
   const searchQuery = useCatPlanetStore((state) => state.searchQuery)
   const coatFilter = useCatPlanetStore((state) => state.coatFilter)
+  const atlasKindFilter = useCatPlanetStore((state) => state.atlasKindFilter)
   const selectedBreedId = useCatPlanetStore((state) => state.selectedBreedId)
   const setHoveredBreedId = useCatPlanetStore((state) => state.setHoveredBreedId)
   const setTooltipPosition = useCatPlanetStore((state) => state.setTooltipPosition)
@@ -328,8 +346,8 @@ export function BreedMarkers() {
   const [lockedClusterKey, setLockedClusterKey] = useState<string | null>(null)
 
   const visibleBreeds = useMemo(
-    () => getVisibleBreeds(activeRegion, searchQuery, coatFilter),
-    [activeRegion, searchQuery, coatFilter],
+    () => getVisibleMarkerBreeds(activeRegion, searchQuery, coatFilter, atlasKindFilter),
+    [activeRegion, searchQuery, coatFilter, atlasKindFilter],
   )
 
   const clusters = useMemo(

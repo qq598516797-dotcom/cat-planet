@@ -228,7 +228,7 @@ export function CatPlanetIntro({ onComplete }: CatPlanetIntroProps) {
             </span>
           ))}
         </h1>
-        <p className="cat-intro-subtitle">Cat Planet · 3D 猫咪品种地球图鉴</p>
+        <p className="cat-intro-subtitle">Cat Planet · 3D 猫咪星球图鉴</p>
       </div>
 
       <button type="button" className="cat-intro-skip" onClick={skip}>

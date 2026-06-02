@@ -7,6 +7,20 @@ import { MarkerProjectionBridge } from './MarkerProjectionBridge'
 import { StarField } from './StarField'
 import { useCatPlanetStore } from '../store/useCatPlanetStore'
 
+const canUseWebGL = () => {
+  if (typeof document === 'undefined') return true
+  try {
+    const canvas = document.createElement('canvas')
+    return Boolean(
+      canvas.getContext('webgl2')
+      || canvas.getContext('webgl')
+      || canvas.getContext('experimental-webgl'),
+    )
+  } catch {
+    return false
+  }
+}
+
 function SceneContents() {
   return (
     <>
@@ -27,6 +41,18 @@ function SceneContents() {
 
 export function PlanetScene() {
   const clearSelection = useCatPlanetStore((state) => state.clearSelection)
+
+  if (!canUseWebGL()) {
+    return (
+      <section className="planet-canvas planet-fallback" aria-label="WebGL fallback">
+        <div>
+          <span>Cat Planet</span>
+          <h2>当前浏览器无法启动 3D 星球</h2>
+          <p>页面仍然可以浏览猫咪小家、选猫测试、性格星图和详情内容。建议开启硬件加速，或换一个浏览器再试。</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <Canvas

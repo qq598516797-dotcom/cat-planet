@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { getVisibleBreeds } from '../../breeds/data/breeds'
+import { getVisibleMarkerBreeds } from '../../breeds/data/breeds'
 import { publishMarkerProjections } from '../data/markerProjectionBus'
 import { latLonToVector3 } from '../math/geo'
 import { useCatPlanetStore } from '../store/useCatPlanetStore'
@@ -16,6 +16,7 @@ export function MarkerProjectionBridge() {
   const activeRegion = useCatPlanetStore((state) => state.activeRegion)
   const searchQuery = useCatPlanetStore((state) => state.searchQuery)
   const coatFilter = useCatPlanetStore((state) => state.coatFilter)
+  const atlasKindFilter = useCatPlanetStore((state) => state.atlasKindFilter)
   const lastProjectionAt = useRef(0)
   const lastSignature = useRef('')
   const scratchProjected = useRef(new THREE.Vector3())
@@ -23,11 +24,11 @@ export function MarkerProjectionBridge() {
 
   const markerPositions = useMemo(
     () =>
-      getVisibleBreeds(activeRegion, searchQuery, coatFilter).map((breed) => ({
+      getVisibleMarkerBreeds(activeRegion, searchQuery, coatFilter, atlasKindFilter).map((breed) => ({
         breedId: breed.id,
         world: latLonToVector3(breed.lat, breed.lon, MARKER_RADIUS),
       })),
-    [activeRegion, searchQuery, coatFilter],
+    [activeRegion, searchQuery, coatFilter, atlasKindFilter],
   )
 
   useEffect(

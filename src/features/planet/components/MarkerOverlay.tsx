@@ -3,7 +3,8 @@ import type { CSSProperties } from 'react'
 import { gsap } from 'gsap'
 import {
   getBreedById,
-  getVisibleBreeds,
+  getVisibleMarkerBreeds,
+  passportRegionForBreed,
   type BreedOrigin,
 } from '../../breeds/data/breeds'
 import {
@@ -318,6 +319,7 @@ function MarkerClusterNode({
   renderExpanded,
   selected,
   selectedBreedId,
+  interactionMode,
   onClose,
   onOpen,
   onToggleLock,
@@ -330,6 +332,7 @@ function MarkerClusterNode({
   renderExpanded: boolean
   selected: boolean
   selectedBreedId: string | null
+  interactionMode: 'atlas' | 'compare' | 'disabled'
   onClose: (cluster: ScreenMarkerCluster) => void
   onOpen: (clusterKey: string) => void
   onToggleLock: (clusterKey: string) => void
@@ -352,6 +355,8 @@ function MarkerClusterNode({
   const quickYRef = useRef<gsap.QuickToFunc | null>(null)
   const itemRefs = useRef(new Map<string, HTMLButtonElement>())
   const directBreed = cluster.count === 1 ? cluster.breeds[0] : null
+  const allowAtlasInteraction = interactionMode === 'atlas'
+  const allowCompareDrag = interactionMode === 'compare'
 
   const setItemRef = (breedId: string) => (node: HTMLButtonElement | null) => {
     if (node) {
@@ -538,10 +543,10 @@ function MarkerClusterNode({
         zIndex: expanded || selected ? 16 : 4 + Math.min(cluster.count, 8),
       } as CSSProperties}
       onPointerEnter={(event) => {
-        if (event.pointerType !== 'touch' && cluster.expandable) onOpen(cluster.key)
+        if (allowAtlasInteraction && event.pointerType !== 'touch' && cluster.expandable) onOpen(cluster.key)
       }}
       onPointerLeave={(event) => {
-        if (event.pointerType !== 'touch') onClose(cluster)
+        if (allowAtlasInteraction && event.pointerType !== 'touch') onClose(cluster)
       }}
     >
       <button
@@ -561,9 +566,11 @@ function MarkerClusterNode({
             ? `${cluster.representative.originLabel} · ${cluster.count}`
             : cluster.representative.ticaName
         }
+        data-drag-breed-id={directBreed?.id}
+        disabled={interactionMode === 'disabled'}
         onPointerEnter={(event) => {
-          if (event.pointerType !== 'touch' && cluster.expandable) onOpen(cluster.key)
-          onShowTooltip(cluster.representative, event, cluster)
+          if (allowAtlasInteraction && event.pointerType !== 'touch' && cluster.expandable) onOpen(cluster.key)
+          if (allowAtlasInteraction) onShowTooltip(cluster.representative, event, cluster)
           animateCenterHover(event.currentTarget, true)
         }}
         onPointerLeave={(event) => {
@@ -572,6 +579,7 @@ function MarkerClusterNode({
         }}
         onClick={(event) => {
           event.stopPropagation()
+          if (allowCompareDrag || interactionMode === 'disabled') return
           if (directBreed) {
             onSelectBreed(directBreed, event)
             return
@@ -582,6 +590,9 @@ function MarkerClusterNode({
         }}
       >
         <MarkerVisual breed={cluster.representative} count={cluster.count} />
+        {allowCompareDrag && directBreed && (
+          <span className="marker-drag-hint" aria-hidden="true">拖</span>
+        )}
       </button>
 
       {renderExpanded && (
@@ -600,8 +611,9 @@ function MarkerClusterNode({
                 ].filter(Boolean).join(' ')}
                 aria-label={`${breed.localized.zh.name} / ${breed.ticaName}`}
                 title={`${breed.localized.zh.name} / ${breed.ticaName}`}
+                data-drag-breed-id={breed.id}
                 onPointerEnter={(event) => {
-                  onShowTooltip(breed, event)
+                  if (allowAtlasInteraction) onShowTooltip(breed, event)
                   animateItemHover(event.currentTarget, true, isSelected)
                 }}
                 onPointerLeave={(event) => {
@@ -609,10 +621,14 @@ function MarkerClusterNode({
                 }}
                 onClick={(event) => {
                   event.stopPropagation()
+                  if (!allowAtlasInteraction) return
                   onSelectBreed(breed, event)
                 }}
               >
                 <MarkerVisual breed={breed} />
+                {allowCompareDrag && (
+                  <span className="marker-drag-hint" aria-hidden="true">拖</span>
+                )}
               </button>
             )
           })}
@@ -638,8 +654,11 @@ export function MarkerOverlay() {
   const activeRegion = useCatPlanetStore((state) => state.activeRegion)
   const searchQuery = useCatPlanetStore((state) => state.searchQuery)
   const coatFilter = useCatPlanetStore((state) => state.coatFilter)
+  const atlasKindFilter = useCatPlanetStore((state) => state.atlasKindFilter)
   const selectedBreedId = useCatPlanetStore((state) => state.selectedBreedId)
+  const activeExperience = useCatPlanetStore((state) => state.activeExperience)
   const selectBreed = useCatPlanetStore((state) => state.selectBreed)
+  const recordBreedExploration = useCatPlanetStore((state) => state.recordBreedExploration)
   const setHoveredBreedId = useCatPlanetStore((state) => state.setHoveredBreedId)
   const setTooltipPosition = useCatPlanetStore((state) => state.setTooltipPosition)
   const flyTo = useCatPlanetStore((state) => state.flyTo)
@@ -650,9 +669,15 @@ export function MarkerOverlay() {
   const [clusters, setClusters] = useState<ScreenMarkerCluster[]>([])
 
   const visibleBreeds = useMemo(
-    () => getVisibleBreeds(activeRegion, searchQuery, coatFilter),
-    [activeRegion, searchQuery, coatFilter],
+    () => getVisibleMarkerBreeds(activeRegion, searchQuery, coatFilter, atlasKindFilter),
+    [activeRegion, searchQuery, coatFilter, atlasKindFilter],
   )
+  const interactionMode =
+    activeExperience === 'atlas'
+      ? 'atlas'
+      : activeExperience === 'compare'
+        ? 'compare'
+        : 'disabled'
 
   useEffect(() => {
     const updateClusters = (projections: ProjectedBreedMarker[]) => {
@@ -722,6 +747,7 @@ export function MarkerOverlay() {
     event: { clientX: number; clientY: number },
     fallback?: { x: number; y: number },
   ) => {
+    if (interactionMode !== 'atlas') return
     setHoveredBreedId(breed.id)
     setTooltipPosition({
       x: event.clientX || fallback?.x || 0,
@@ -740,8 +766,24 @@ export function MarkerOverlay() {
     breed: BreedOrigin,
     event: { clientX: number; clientY: number },
   ) => {
+    if (interactionMode !== 'atlas') return
     selectBreed(breed.id)
+    recordBreedExploration(breed.id, passportRegionForBreed(breed))
     showTooltip(breed, event)
+    if (breed.atlasKind === 'coatPattern') {
+      flyTo(
+        {
+          ...regionTargets.Global,
+          label: breed.ticaName,
+          lat: regionTargets.Global.lat,
+          lon: regionTargets.Global.lon,
+          distance: 3.55,
+        },
+        breed.id,
+      )
+      return
+    }
+
     flyTo(
       {
         ...regionTargets[breed.region],
@@ -814,7 +856,12 @@ export function MarkerOverlay() {
   }, [activeClusters])
 
   return (
-    <div className="marker-overlay" aria-label="Cat breed map markers">
+    <div
+      className="marker-overlay"
+      aria-label="Cat breed map markers"
+      data-experience={activeExperience}
+      data-interaction-mode={interactionMode}
+    >
       <svg ref={lineLayerRef} className="marker-line-layer" aria-hidden="true">
         {activeClusters.flatMap((cluster) => {
           const expanded =
@@ -837,6 +884,8 @@ export function MarkerOverlay() {
 
       {clusters.map((cluster) => {
         const expanded =
+          interactionMode === 'atlas'
+          &&
           cluster.expandable
           && (
             cluster.key === hoveredClusterKey
@@ -856,6 +905,7 @@ export function MarkerOverlay() {
             renderExpanded={renderExpanded}
             selected={selected}
             selectedBreedId={selectedBreedId}
+            interactionMode={interactionMode}
             onClose={closeCluster}
             onOpen={(clusterKey) => {
               cancelScheduledClose()

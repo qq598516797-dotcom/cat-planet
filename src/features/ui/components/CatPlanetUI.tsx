@@ -1,15 +1,14 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type Ref } from 'react'
-import { toPng } from 'html-to-image'
+import { useEffect, useMemo, useRef, useState, type Ref } from 'react'
 import { gsap } from 'gsap'
 import { Flip } from 'gsap/Flip'
+import { Draggable } from 'gsap/Draggable'
 import { useGSAP } from '@gsap/react'
 import {
-  BookOpen,
   CalendarDays,
+  BookOpen,
   Cat,
   ChevronRight,
   Compass,
-  Download,
   ExternalLink,
   Eye,
   EyeOff,
@@ -17,173 +16,253 @@ import {
   GitCompare,
   Globe2,
   Heart,
-  Image,
   Info,
+  Image,
+  LibraryBig,
   Languages,
   MapPin,
   PlayCircle,
   Route,
   RotateCcw,
   Search,
-  Share2,
+  Brush,
+  Gamepad2,
+  Soup,
   Sparkles,
   Star,
-  Volume2,
-  VolumeX,
+  X,
 } from 'lucide-react'
 import {
   breeds,
+  breedsForPersonalityZone,
   getBreedById,
   getBreedSearchHint,
   getVisibleBreeds,
+  passportRegionForBreed,
+  personalityZoneIdsForBreed,
+  personalityZones,
   regions,
   ticaBreedSource,
+  type AtlasKindFilter,
   type BreedOrigin,
+  type PersonalityZoneId,
   type Region,
 } from '../../breeds/data/breeds'
 import { regionTargets } from '../../planet/data/regionTargets'
 import {
   useCatPlanetStore,
+  homeDecorCatalog,
+  homeLevelTitles,
+  homeXpTargetForLevel,
   type ActiveExperience,
   type CoatFilter,
   type GuardianBirthday,
+  type HomeAction,
+  type HomeDailyWish,
+  type HomeDecorId,
+  type HomeDiaryEntry,
+  type HomeInteractionMode,
+  type HomeMood,
+  type HomeWishCompletionSource,
+  type HomeStatsState,
   type Language,
-  type ShareCardMode,
-  type ShareCardSide,
 } from '../../planet/store/useCatPlanetStore'
 
-gsap.registerPlugin(Flip, useGSAP)
+gsap.registerPlugin(Flip, Draggable, useGSAP)
 
 const copy = {
   zh: {
-    hide: '隐藏界面',
-    show: '显示界面',
-    reset: '回到全球视角',
-    eyebrow: '3D 猫咪品种地球图鉴',
-    title: '猫咪星球',
-    source: '查看 TICA 总品种来源',
-    search: '搜索品种、简称、原产地或特征',
-    regions: '地区快速选择',
-    list: '品种图鉴',
-    emptyTitle: '选择一个猫咪品种',
-    emptyBody: '搜索“美短”“英短”“布偶”“缅因”或拖动星球，悬停品种徽章查看原产地。',
-    dataNote: '坐标为国家或历史地区质心，用于图鉴展示，不代表精确出生地点。',
-    aliases: '常用叫法',
-    origin: '原产地',
-    status: 'TICA 状态',
-    coordinate: '坐标口径',
-    countries: '国家/地区',
-    story: '专属可查故事',
-    externalStories: '故事与视频',
-    facts: '图鉴信息',
-    traits: '性格与特征',
-    care: '护理',
-    size: '体型',
-    lifespan: '寿命',
-    colors: '外观关键词',
-    sources: '资料来源',
-    photoCredit: '图片',
-    ticaProfile: 'TICA 品种资料',
-    ticaAll: 'TICA 总品种页',
-    high: '国家/地区质心',
-    medium: '历史地区质心',
-    low: '粗略区域质心',
-    atlas: '图鉴',
-    route: '旅程',
-    quiz: '选猫测试',
-    compare: '对比',
-    constellation: '星座',
-    passport: '我的星球',
-    dailyCat: '每日猫咪',
-    todayLand: '今日推荐',
-    dailyPrompt: '今天降落到这只猫的星球坐标',
-    landHere: '定位到星球',
-    favorite: '收藏',
-    favorited: '已收藏',
-    compareAdd: '加入对比',
-    compareRemove: '移出对比',
-    compareLimit: '最多对比 3 个品种',
-    openRoute: '查看旅程',
-    radar: '性格雷达',
-    careGuide: '照顾提醒',
-    routeCard: '品种起源旅程',
-    journeyIntro: '用时间线读懂这个品种从哪里来、为什么会被记住。',
-    routeOrigin: '起点：原产地',
-    routeDevelopment: '发展：培育/传播背景',
-    routeToday: '今天：现代家庭中的形象',
-    constellationTitle: '守护猫星座',
-    constellationIntro: '选择生日日期，星座会筛选出你的守护猫，并解释它为什么适合你。',
-    guardianPrompt: '选择你的生日日期',
-    guardianResult: '你的守护猫咪',
-    guardianBackup: '备选守护猫',
-    guardianWhy: '为什么它是你的守护猫',
-    guardianPersonality: '性格契合',
-    guardianOrigin: '起源气质',
-    guardianCare: '相处提示',
-    guardianSources: '继续了解',
-    guardianArticle: '品种文章',
-    guardianVideo: '视频入口',
-    storySector: '星座解析',
-    passportTitle: '我的猫咪星球',
-    passportEmpty: '先测出你的守护猫，或收藏喜欢的猫咪，再生成分享名片。',
-    savedCoordinates: '已收藏的星球坐标',
-    shareCardTitle: '猫咪星球名片',
-    shareCardGuardian: '我的守护猫',
-    shareCardFavorites: '收藏星球',
-    shareCardModeGuardian: '守护猫名片',
-    shareCardModeFavorites: '收藏名片',
-    shareCardFront: '正面',
-    shareCardBack: '背面',
-    shareCardPurpose: '保存我的守护猫星球坐标，也可以分享给朋友测同款守护猫。',
-    shareCardStamp: '守护邮戳',
-    shareCardCoords: '星球坐标',
-    shareCardStamps: '收藏邮票',
-    downloadCurrentCard: '下载当前面',
-    downloadBothCards: '下载双面图',
-    viewStory: '看它的故事',
-    testFriend: '给朋友测一测',
-    generatingCard: '生成中...',
-    birthDate: '生日',
-    guardianLanding: '今天降落在',
-    cardLineOne: '这是一张来自猫咪星球的温柔坐标。',
-    cardLineTwo: '把喜欢的猫咪、星座和故事一起保存下来。',
-    cardLineThree: '下次打开图鉴，可以继续从这里出发。',
-    soundOn: '关闭音效',
-    soundOff: '开启音效',
-    downloadPassport: '下载分享图',
-    noRoute: '这个品种暂时还没有专属起源旅程。',
-    quizTitle: '帮我找一只适合我的猫',
-    quizSubtitle: '一题一题回答，最后推荐 1-2 个更适合你的品种。',
-    quizProgress: '已回答',
-    quizResults: '推荐结果',
-    quizBack: '上一题',
-    quizNext: '下一题',
-    quizFinish: '查看推荐',
-    quizRestart: '重新测试',
-    quizReason: '匹配理由',
-    compareEmpty: '先在详情页把 2-3 个品种加入对比。',
-    clearCompare: '清空对比',
-    storyEntry: '故事入口',
+    hide: '????',
+    show: '????',
+    reset: '??????',
+    eyebrow: '3D ????',
+    title: '????',
+    source: '??????',
+    search: '?????????????????',
+    regions: '??????',
+    list: '????',
+    emptyTitle: '?????????????',
+    emptyBody: '????????????????????????????????????????????',
+    dataNote: '???????????????????????????????',
+    aliases: '????',
+    origin: '???',
+    status: '????',
+    coordinate: '????',
+    countries: '??/??',
+    story: '????',
+    externalStories: '?????',
+    facts: '????',
+    traits: '?????',
+    care: '??',
+    size: '??',
+    lifespan: '??',
+    colors: '?????',
+    sources: '????',
+    photoCredit: '??',
+    ticaProfile: '????',
+    ticaAll: 'TICA ????',
+    high: '??/????',
+    medium: '??????',
+    low: '??????',
+    atlas: '??',
+    route: '??',
+    quiz: '????',
+    compare: '??',
+    constellation: '??',
+    personalityMap: '????',
+    passport: '????',
+    dailyCat: '????',
+    todayLand: '????',
+    dailyPrompt: '?????????????',
+    landHere: '?????',
+    favorite: '??',
+    favorited: '???',
+    compareAdd: '????',
+    compareRemove: '????',
+    compareLimit: '???? 3 ??',
+    openRoute: '????',
+    radar: '????',
+    careGuide: '????',
+    routeCard: '??????',
+    journeyIntro: '??????????????????????',
+    routeOrigin: '??????',
+    routeDevelopment: '????????',
+    routeToday: '?????????',
+    constellationTitle: '?????',
+    constellationIntro: '?????????????????????????????',
+    guardianPrompt: '??????',
+    guardianResult: '?????',
+    guardianBackup: '?????',
+    guardianWhy: '???????',
+    guardianPersonality: '????',
+    guardianOrigin: '????',
+    guardianCare: '????',
+    guardianSources: '????',
+    guardianArticle: '????',
+    guardianVideo: '????',
+    storySector: '????',
+    passportTitle: '????',
+    passportEmpty: '??????????????????????',
+    savedCoordinates: '????????',
+    passportIntro: '?????????????????????????????',
+    passportProgress: '????',
+    passportStamps: '????',
+    passportStickers: '????',
+    passportNoStamps: '???????????',
+    passportNoStickers: '????????????????????',
+    exploredCount: '???',
+    stampCount: '??',
+    stickerCount: '??',
+    shareCardTitle: '??????',
+    shareCardGuardian: '?????',
+    shareCardFavorites: '????',
+    shareCardModeGuardian: '?????',
+    shareCardModeFavorites: '????',
+    shareCardFront: '??',
+    shareCardBack: '??',
+    shareCardPurpose: '???????????????????????????',
+    shareCardStamp: '????',
+    shareCardCoords: '????',
+    shareCardStamps: '????',
+    downloadCurrentCard: '?????',
+    downloadBothCards: '?????',
+    viewStory: '?????',
+    testFriend: '??????',
+    generatingCard: '???...',
+    birthDate: '??',
+    guardianLanding: '?????',
+    cardLineOne: '????????????????',
+    cardLineTwo: '???????????????????',
+    cardLineThree: '?????????????????',
+    soundOn: '????',
+    soundOff: '????',
+    downloadPassport: '?????',
+    noRoute: '??????????????????????????',
+    quizTitle: '??????????',
+    quizSubtitle: '??????????? 1-2 ?????????',
+    quizProgress: '???',
+    quizResults: '????',
+    quizBack: '???',
+    quizNext: '???',
+    quizFinish: '????',
+    quizRestart: '????',
+    quizReason: '????',
+    compareEmpty: '????????????????? 2-3 ???',
+    clearCompare: '????',
+    storyEntry: '????',
+    personalityMapTitle: '??????',
+    personalityMapIntro: '??????????????????????????????',
+    personalityMapEmpty: '????????????????',
+    companionTitle: '????',
+    companionChoose: '??????',
+    companionCollapse: '??',
+    companionExpand: '????',
+    companionIdle: '???????????????????',
+    companionHappy: '?????????????',
+    companionCurious: '???????????????',
+    companionSleepy: '???????????????',
+    catHomeTitle: '????',
+    catHomeIntro: '??????????????????????????????????',
+    catHomePick: '?????',
+    homeHunger: '??',
+    homeClean: '??',
+    homeEnergy: '??',
+    homeMoodStat: '??',
+    homeAffection: '??',
+    homeFeed: '??',
+    homeGroom: '??',
+    homeCleanAction: '??',
+    homePlay: '??',
+    homeRest: '??',
+    homeActionFeed: '??????????????',
+    homeActionGroom: '??????????????',
+    homeActionClean: '???????????????',
+    homeActionPlay: '?????????????????',
+    homeActionRest: '???????????????????',
+    homeNoCat: '??????????????????????',
+    homeDailyWish: '????',
+    homeWishDone: '???????',
+    homeWishReward: '??',
+    homeGoNow: '???',
+    homeLevel: '????',
+    homeStardust: '??',
+    homeDecor: '????',
+    homeDiary: '????',
+    homeEmptyDiary: '??????????????????????',
+    homeAwayNote: '?????????????',
+    homeWishCareFeed: '????????',
+    homeWishCareGroom: '?????????',
+    homeWishCareClean: '??????????',
+    homeWishCarePlay: '?????????',
+    homeWishCareRest: '??????????',
+    homeWishExplore: '?????????????',
+    homeWishPersonality: '?????????????',
+    homeWishStory: '????????',
+    homeWishFavorite: '?????????',
+    homeWishCompare: '????????????',
+    compareDropTitle: '?????????',
+    compareDropHint: '???????????????????????',
+    compareDropFull: '?????? 3 ???',
   },
   en: {
     hide: 'Hide interface',
     show: 'Show interface',
     reset: 'Reset to global view',
-    eyebrow: '3D Cat Breed Atlas',
+    eyebrow: '3D Cat Planet',
     title: 'Cat Planet',
-    source: 'Open TICA breed source',
-    search: 'Search breed, alias, origin, or trait',
+    source: 'Open sources',
+    search: 'Search cat, breed, coat pattern, alias, origin, or trait',
     regions: 'Quick region picker',
-    list: 'Breed atlas',
-    emptyTitle: 'Choose a cat breed',
-    emptyBody: 'Try “American Shorthair”, “Ragdoll”, “Maine Coon”, or rotate the planet and hover a breed badge.',
-    dataNote: 'Coordinates are country or historical-region centroids for atlas display, not exact birthplaces.',
+    list: 'Cat atlas',
+    emptyTitle: 'Care for your home cat, then explore the planet',
+    emptyBody: 'Start with Cat Home feeding and grooming, or search Ragdoll, Maine Coon, Chinese Domestic Cat, Calico, or Orange Tabby.',
+    dataNote: 'Coordinates are for atlas display, not exact birthplaces. Coat patterns do not have one fixed origin.',
     aliases: 'Common aliases',
     origin: 'Origin',
-    status: 'TICA status',
+    status: 'Registry status',
     coordinate: 'Coordinate basis',
     countries: 'Countries',
-    story: 'Verified breed story',
+    story: 'Verified story',
     externalStories: 'Stories & videos',
     facts: 'Atlas facts',
     traits: 'Traits',
@@ -193,7 +272,7 @@ const copy = {
     colors: 'Visual keywords',
     sources: 'Sources',
     photoCredit: 'Photo',
-    ticaProfile: 'TICA breed profile',
+    ticaProfile: 'Breed profile',
     ticaAll: 'TICA all breeds',
     high: 'Country/region centroid',
     medium: 'Historical-region centroid',
@@ -203,7 +282,8 @@ const copy = {
     quiz: 'Match Quiz',
     compare: 'Compare',
     constellation: 'Constellation',
-    passport: 'My Planet',
+    personalityMap: 'Personality Map',
+    passport: 'Cat Home',
     dailyCat: 'Daily Cat',
     todayLand: 'Today we land on',
     dailyPrompt: 'Today we land on this cat coordinate',
@@ -212,21 +292,21 @@ const copy = {
     favorited: 'Saved',
     compareAdd: 'Compare',
     compareRemove: 'Remove',
-    compareLimit: 'Compare up to 3 breeds',
+    compareLimit: 'Compare up to 3 cats',
     openRoute: 'Open journey',
     radar: 'Personality radar',
-    careGuide: 'Beginner care notes',
+    careGuide: 'Care notes',
     routeCard: 'Breed origin journey',
-    journeyIntro: 'Read where this breed started, how it spread, and why people remember it today.',
+    journeyIntro: 'Read where this cat started, how it spread, and why people remember it today.',
     routeOrigin: 'Start: origin',
     routeDevelopment: 'Development: breeding and spread',
     routeToday: 'Today: family image',
     constellationTitle: 'Guardian cat constellation',
-    constellationIntro: 'Choose a birth date. The constellation match will pick a guardian cat and explain why it fits.',
-    guardianPrompt: 'Choose your birth date',
+    constellationIntro: 'Choose a birthday to reveal your guardian cat and read why it fits.',
+    guardianPrompt: 'Choose your birthday',
     guardianResult: 'Your guardian cat',
     guardianBackup: 'Backup guardian',
-    guardianWhy: 'Why this cat fits your sign',
+    guardianWhy: 'Why this cat fits you',
     guardianPersonality: 'Personality fit',
     guardianOrigin: 'Origin mood',
     guardianCare: 'Companion notes',
@@ -234,9 +314,18 @@ const copy = {
     guardianArticle: 'Breed article',
     guardianVideo: 'Video doorway',
     storySector: 'Constellation reading',
-    passportTitle: 'My Cat Planet',
-    passportEmpty: 'Find your guardian cat or save favorite breeds first, then generate a share card.',
+    passportTitle: 'Cat Home',
+    passportEmpty: 'Choose a home cat first, then feed, groom, clean, or play with it.',
     savedCoordinates: 'Saved planet coordinates',
+    passportIntro: 'Stamps and stickers are removed here. This is now a light interactive cat home.',
+    passportProgress: 'Home status',
+    passportStamps: 'Home status',
+    passportStickers: 'Home cats',
+    passportNoStamps: 'Choose a cat for Cat Home first.',
+    passportNoStickers: 'Pick a cat from the atlas, guardian result, or personality map.',
+    exploredCount: 'Explored',
+    stampCount: 'Clean',
+    stickerCount: 'Bond',
     shareCardTitle: 'Cat Planet Card',
     shareCardGuardian: 'My Guardian Cat',
     shareCardFavorites: 'Favorite Planet',
@@ -258,33 +347,260 @@ const copy = {
     cardLineOne: 'A soft coordinate from Cat Planet.',
     cardLineTwo: 'Save your favorite cats, sign, and story together.',
     cardLineThree: 'Next time, continue exploring from here.',
-    soundOn: 'Mute sound',
-    soundOff: 'Enable sound',
+    soundOn: 'Home feedback',
+    soundOff: 'Home feedback',
     downloadPassport: 'Download share image',
-    noRoute: 'This breed does not have a dedicated origin journey yet. Read its story and sources first.',
+    noRoute: 'This entry does not have a dedicated origin journey yet. Read its detail and sources first.',
     quizTitle: 'Find a cat that fits me',
-    quizSubtitle: 'Answer one card at a time. The result recommends 1-2 fitting breeds.',
+    quizSubtitle: 'Answer one card at a time. The result recommends 1-2 fitting cats.',
     quizProgress: 'Answered',
-    quizResults: 'Recommended breeds',
+    quizResults: 'Recommended cats',
     quizBack: 'Back',
     quizNext: 'Next',
     quizFinish: 'See matches',
     quizRestart: 'Restart',
     quizReason: 'Why it fits',
-    compareEmpty: 'Add 2-3 breeds from the detail panel first.',
+    compareEmpty: 'Add 2-3 cats from details, personality cards, or planet avatars first.',
     clearCompare: 'Clear compare',
     storyEntry: 'Story entry',
+    personalityMapTitle: 'Cat Personality Map',
+    personalityMapIntro: 'Cats are grouped by personality radar zones so their lifestyle fit is easier to understand.',
+    personalityMapEmpty: 'Not enough representative cats in this zone yet.',
+    companionTitle: 'Cloud Cat Cabin',
+    companionChoose: 'Set home cat',
+    companionCollapse: 'Collapse',
+    companionExpand: 'Open cabin',
+    companionIdle: 'Open Cat Home to feed, groom, or play first.',
+    companionHappy: 'It was just cared for and feels better.',
+    companionCurious: 'It wants to meet a new friend on the planet.',
+    companionSleepy: 'The cabin is quiet and it is resting by the window.',
+    catHomeTitle: 'Cat Home',
+    catHomeIntro: 'Your home cat gives one small wish that leads you back to the planet: explore, save, compare, and read stories.',
+    catHomePick: 'Choose home cat',
+    homeHunger: 'Fullness',
+    homeClean: 'Clean',
+    homeEnergy: 'Energy',
+    homeMoodStat: 'Mood',
+    homeAffection: 'Bond',
+    homeFeed: 'Feed',
+    homeGroom: 'Groom',
+    homeCleanAction: 'Clean',
+    homePlay: 'Play',
+    homeRest: 'Rest',
+    homeActionFeed: 'The cat is full and settles into a softer mood.',
+    homeActionGroom: 'Its coat is brushed smooth and it closes its eyes.',
+    homeActionClean: 'The home feels clean and lighter now.',
+    homeActionPlay: 'It chased the toy and bonded with you.',
+    homeActionRest: 'It napped near the window and woke up facing the planet.',
+    homeNoCat: 'Choose a cat from the atlas, guardian result, or personality map first.',
+    homeDailyWish: 'Daily wish',
+    homeWishDone: 'Daily wish complete',
+    homeWishReward: 'Reward',
+    homeGoNow: 'Go now',
+    homeLevel: 'Companion level',
+    homeStardust: 'Stardust',
+    homeDecor: 'Cabin decor',
+    homeDiary: 'Cabin diary',
+    homeEmptyDiary: 'After completing a wish, your small diary with the cat appears here.',
+    homeAwayNote: 'I slept for a long while and happened to be waiting for you.',
+    homeWishCareFeed: 'I want a small dried fish snack.',
+    homeWishCareGroom: 'I want my fur brushed smooth.',
+    homeWishCareClean: 'I want the cabin to feel bright again.',
+    homeWishCarePlay: 'I want to chase a toy once.',
+    homeWishCareRest: 'I want a short nap by the window.',
+    homeWishExplore: 'I want to visit a cat from another region.',
+    homeWishPersonality: 'I want to meet a friend with a matching personality.',
+    homeWishStory: 'I want to watch one story star.',
+    homeWishFavorite: 'I want to organize the photo wall.',
+    homeWishCompare: 'I want to find a similar friend to compare.',
+    compareDropTitle: 'Drag a cat here to compare',
+    compareDropHint: 'Drag from the left list, personality cards, or planet avatars.',
+    compareDropFull: 'You can compare up to 3 cats.',
   },
 } satisfies Record<Language, Record<string, string>>
 
+Object.assign(copy.zh, {
+  hide: '隐藏界面',
+  show: '显示界面',
+  reset: '回到全球视角',
+  eyebrow: '3D 猫咪星球',
+  title: '猫咪星球',
+  source: '查看资料来源',
+  search: '搜索猫咪、品种、花色、简称或原产地',
+  regions: '地区快速选择',
+  list: '猫咪图鉴',
+  emptyTitle: '先照顾小家猫咪，再探索星球',
+  emptyBody: '可以先进入猫咪小家投喂、梳毛、陪玩，也可以搜索美短、英短、布偶、中华田园猫、三花、橘猫。',
+  dataNote: '坐标用于图鉴展示，不代表精确出生地点。花色猫不绑定单一原产地。',
+  aliases: '常用叫法',
+  origin: '原产地',
+  status: '登记状态',
+  coordinate: '坐标说明',
+  countries: '国家/地区',
+  story: '可查故事',
+  externalStories: '故事与视频',
+  facts: '图鉴信息',
+  traits: '性格与特征',
+  care: '护理',
+  size: '体型',
+  lifespan: '寿命',
+  colors: '外观关键词',
+  sources: '资料来源',
+  photoCredit: '图片',
+  ticaProfile: '品种资料',
+  ticaAll: 'TICA 品种列表',
+  high: '国家/地区质心',
+  medium: '历史地区质心',
+  low: '粗略区域质心',
+  atlas: '图鉴',
+  route: '旅程',
+  quiz: '选猫测试',
+  compare: '对比',
+  constellation: '星座',
+  personalityMap: '性格星图',
+  passport: '猫咪小家',
+  dailyCat: '每日猫咪',
+  todayLand: '今日降落',
+  dailyPrompt: '今天从这只猫的星球坐标出发',
+  landHere: '定位到星球',
+  favorite: '收藏',
+  favorited: '已收藏',
+  compareAdd: '加入对比',
+  compareRemove: '移出对比',
+  compareLimit: '最多对比 3 只猫',
+  openRoute: '查看旅程',
+  radar: '性格雷达',
+  careGuide: '照顾提醒',
+  routeCard: '品种起源旅程',
+  journeyIntro: '用时间线读懂它从哪里来，以及为什么被人记住。',
+  routeOrigin: '起点：原产地',
+  routeDevelopment: '发展：培育与传播',
+  routeToday: '今天：家庭中的形象',
+  constellationTitle: '守护猫星座',
+  constellationIntro: '选择生日日期，找到你的守护猫，并查看性格、起源和相处提示。',
+  guardianPrompt: '选择你的生日',
+  guardianResult: '你的守护猫',
+  guardianBackup: '备选守护猫',
+  guardianWhy: '为什么它适合你',
+  guardianPersonality: '性格契合',
+  guardianOrigin: '起源气质',
+  guardianCare: '相处提示',
+  guardianSources: '继续了解',
+  guardianArticle: '品种文章',
+  guardianVideo: '视频入口',
+  storySector: '星座解析',
+  passportTitle: '猫咪小家',
+  passportEmpty: '先选择一只猫入住，再投喂、梳毛、打扫或陪玩。',
+  savedCoordinates: '已收藏的星球坐标',
+  passportIntro: '这里不再展示印章和贴纸，而是照顾一只会提出愿望的小家猫咪。',
+  passportProgress: '小家状态',
+  passportStamps: '小家状态',
+  passportStickers: '小家猫咪',
+  passportNoStamps: '先选择一只猫入住小家。',
+  passportNoStickers: '可以从图鉴、守护猫或性格星图选择入住猫。',
+  exploredCount: '已探索',
+  stampCount: '整洁',
+  stickerCount: '亲密',
+  shareCardTitle: '猫咪星球名片',
+  shareCardGuardian: '我的守护猫',
+  shareCardFavorites: '收藏星球',
+  shareCardModeGuardian: '守护猫名片',
+  shareCardModeFavorites: '收藏名片',
+  shareCardFront: '正面',
+  shareCardBack: '背面',
+  shareCardPurpose: '保存我的守护猫星球坐标，也可以分享给朋友测同款守护猫。',
+  shareCardStamp: '守护邮戳',
+  shareCardCoords: '星球坐标',
+  shareCardStamps: '收藏邮票',
+  downloadCurrentCard: '下载当前面',
+  downloadBothCards: '下载双面图',
+  viewStory: '看它的故事',
+  testFriend: '给朋友测一测',
+  generatingCard: '生成中...',
+  birthDate: '生日',
+  guardianLanding: '今天降落在',
+  cardLineOne: '这是一张来自猫咪星球的温柔坐标。',
+  cardLineTwo: '把喜欢的猫咪、星座和故事一起保存下来。',
+  cardLineThree: '下次打开图鉴，可以继续从这里出发。',
+  soundOn: '小家反馈',
+  soundOff: '小家反馈',
+  downloadPassport: '下载分享图',
+  noRoute: '这个条目暂时还没有专属起源旅程，可以先看详情和来源。',
+  quizTitle: '帮我找一只适合我的猫',
+  quizSubtitle: '一题一题回答，最后推荐 1-2 个更适合你的猫咪。',
+  quizProgress: '已回答',
+  quizResults: '推荐结果',
+  quizBack: '上一题',
+  quizNext: '下一题',
+  quizFinish: '查看推荐',
+  quizRestart: '重新测试',
+  quizReason: '匹配理由',
+  compareEmpty: '先从详情页、性格星图或地球头像加入 2-3 只猫。',
+  clearCompare: '清空对比',
+  storyEntry: '故事入口',
+  personalityMapTitle: '猫咪性格星图',
+  personalityMapIntro: '把猫咪按性格雷达聚成星区，更直观看出它们适合怎样的生活节奏。',
+  personalityMapEmpty: '这个星区暂时还没有足够代表猫咪。',
+  companionTitle: '云养猫舱',
+  companionChoose: '设为小家猫咪',
+  companionCollapse: '收起',
+  companionExpand: '打开猫舱',
+  companionIdle: '点我进入猫咪小家，先投喂、梳毛或陪玩。',
+  companionHappy: '刚刚被照顾过，心情变好了。',
+  companionCurious: '它想去星球上认识新的猫咪朋友。',
+  companionSleepy: '小家安静下来，它正在窗边休息。',
+  catHomeTitle: '猫咪小家',
+  catHomeIntro: '入住猫每天会提出一个小愿望，引导你去探索星球、收藏、对比或阅读故事。',
+  catHomePick: '选择入住猫',
+  homeHunger: '饱腹',
+  homeClean: '清洁',
+  homeEnergy: '精力',
+  homeMoodStat: '心情',
+  homeAffection: '亲密',
+  homeFeed: '投喂',
+  homeGroom: '梳毛',
+  homeCleanAction: '打扫',
+  homePlay: '陪玩',
+  homeRest: '休息',
+  homeActionFeed: '它吃饱了，尾巴轻轻晃了一下。',
+  homeActionGroom: '毛发被梳顺了，看起来更精神。',
+  homeActionClean: '小家被打扫干净，空气都变亮了。',
+  homeActionPlay: '它追着玩具扑了一下，心情明显变好。',
+  homeActionRest: '它在窗边睡了一会儿，醒来刚好看见星球。',
+  homeNoCat: '先从图鉴、守护猫或性格星图里选择一只猫入住。',
+  homeDailyWish: '今日愿望',
+  homeWishDone: '今日愿望已完成',
+  homeWishReward: '奖励',
+  homeGoNow: '去完成',
+  homeLevel: '陪伴等级',
+  homeStardust: '星尘',
+  homeDecor: '小家装饰',
+  homeDiary: '猫舱日记',
+  homeEmptyDiary: '完成一次愿望后，这里会留下你和猫咪的小日记。',
+  homeAwayNote: '我睡了很久，刚好等你回来。',
+  homeWishCareFeed: '想吃一点小鱼干。',
+  homeWishCareGroom: '想把毛毛梳顺一点。',
+  homeWishCareClean: '想把小家打扫亮一点。',
+  homeWishCarePlay: '想追着玩具扑一下。',
+  homeWishCareRest: '想在窗边睡一小会儿。',
+  homeWishExplore: '想去看看一个新的地区猫咪。',
+  homeWishPersonality: '想认识一只性格相近的朋友。',
+  homeWishStory: '想看一颗故事星。',
+  homeWishFavorite: '想整理一张照片墙。',
+  homeWishCompare: '想找一只相似伙伴来对比。',
+  compareDropTitle: '拖一只猫到这里对比',
+  compareDropHint: '可以从左侧列表、性格星图卡片或地球头像拖进来。',
+  compareDropFull: '对比栏最多放 3 只猫。',
+})
+
 const regionLabel: Record<Language, Record<Region, string>> = {
   zh: {
-    Global: '全球',
-    Asia: '亚洲',
-    Europe: '欧洲',
-    'North America': '北美洲',
-    'Middle East': '中东',
-    'Africa/Oceania': '非洲/大洋洲',
+    Global: '??',
+    Asia: '??',
+    Europe: '??',
+    'North America': '???',
+    'Middle East': '??',
+    'Africa/Oceania': '??/???',
   },
   en: {
     Global: 'Global',
@@ -296,14 +612,23 @@ const regionLabel: Record<Language, Record<Region, string>> = {
   },
 }
 
+Object.assign(regionLabel.zh, {
+  Global: '全球',
+  Asia: '亚洲',
+  Europe: '欧洲',
+  'North America': '北美洲',
+  'Middle East': '中东',
+  'Africa/Oceania': '非洲/大洋洲',
+})
+
 const coatLabel: Record<Language, Record<CoatFilter, string>> = {
   zh: {
-    all: '全部',
-    short: '短毛',
-    long: '长毛',
-    hairless: '无毛',
-    rex: '卷毛',
-    mixed: '多毛型',
+    all: '??',
+    short: '??',
+    long: '??',
+    hairless: '??',
+    rex: '??',
+    mixed: '???',
   },
   en: {
     all: 'All',
@@ -315,14 +640,63 @@ const coatLabel: Record<Language, Record<CoatFilter, string>> = {
   },
 }
 
+Object.assign(coatLabel.zh, {
+  all: '全部',
+  short: '短毛',
+  long: '长毛',
+  hairless: '无毛',
+  rex: '卷毛',
+  mixed: '多毛型',
+})
+
+const atlasKindFilterLabel: Record<Language, Record<AtlasKindFilter, string>> = {
+  zh: {
+    all: '??',
+    formalBreed: '????',
+    localAndPattern: '?????',
+  },
+  en: {
+    all: 'All',
+    formalBreed: 'Formal breeds',
+    localAndPattern: 'Local & coat',
+  },
+}
+
+Object.assign(atlasKindFilterLabel.zh, {
+  all: '全部',
+  formalBreed: '正式品种',
+  localAndPattern: '本土与花色',
+})
+
+const atlasKindLabel: Record<Language, Record<BreedOrigin['atlasKind'], string>> = {
+  zh: {
+    formalBreed: '????',
+    localDomestic: '???',
+    coatPattern: '????',
+  },
+  en: {
+    formalBreed: 'Formal breed',
+    localDomestic: 'Local domestic',
+    coatPattern: 'Coat pattern',
+  },
+}
+
+Object.assign(atlasKindLabel.zh, {
+  formalBreed: '正式品种',
+  localDomestic: '本土猫',
+  coatPattern: '花色类型',
+})
+
 const coatFilters: CoatFilter[] = ['all', 'short', 'long', 'hairless', 'rex', 'mixed']
+const atlasKindFilters: AtlasKindFilter[] = ['all', 'formalBreed', 'localAndPattern']
 const experienceOptions: Array<{ id: ActiveExperience; icon: typeof Globe2 }> = [
   { id: 'atlas', icon: Globe2 },
   { id: 'route', icon: Route },
   { id: 'quiz', icon: Compass },
   { id: 'compare', icon: GitCompare },
   { id: 'constellation', icon: Star },
-  { id: 'passport', icon: Share2 },
+  { id: 'personalityMap', icon: Sparkles },
+  { id: 'passport', icon: LibraryBig },
 ]
 
 const radarKeys = [
@@ -336,12 +710,12 @@ const radarKeys = [
 
 const radarLabel: Record<Language, Record<(typeof radarKeys)[number], string>> = {
   zh: {
-    affectionate: '亲人度',
-    active: '活跃度',
-    calm: '安静度',
-    grooming: '护理难度',
-    beginnerFriendly: '新手友好',
-    shedding: '掉毛程度',
+    affectionate: '???',
+    active: '???',
+    calm: '???',
+    grooming: '????',
+    beginnerFriendly: '????',
+    shedding: '????',
   },
   en: {
     affectionate: 'Affection',
@@ -352,6 +726,15 @@ const radarLabel: Record<Language, Record<(typeof radarKeys)[number], string>> =
     shedding: 'Shedding',
   },
 }
+
+Object.assign(radarLabel.zh, {
+  affectionate: '亲人度',
+  active: '活跃度',
+  calm: '安静度',
+  grooming: '护理难度',
+  beginnerFriendly: '新手友好',
+  shedding: '掉毛程度',
+})
 
 const quizQuestions = [
   {
@@ -676,6 +1059,7 @@ const interactiveMotionSelector = [
   '.source-link',
   '.hud-icon',
   '.coat-filter button',
+  '.atlas-kind-filter button',
   '.region-grid button',
   '.dock-pills button',
   '.breed-list button',
@@ -770,8 +1154,8 @@ const catToneFor = (id: string) => {
   return catPalette[hash % catPalette.length]
 }
 
-function regionCount(region: Region, coatFilter: CoatFilter) {
-  return getVisibleBreeds(region, '', coatFilter).length
+function regionCount(region: Region, coatFilter: CoatFilter, atlasKindFilter: AtlasKindFilter) {
+  return getVisibleBreeds(region, '', coatFilter, atlasKindFilter).length
 }
 
 function CatAvatar({
@@ -796,13 +1180,24 @@ function getLocalizedTraits(breed: BreedOrigin, language: Language) {
 
 function factItems(breed: BreedOrigin, language: Language) {
   const t = copy[language]
+  const coordinateValue = breed.atlasKind === 'coatPattern'
+    ? language === 'zh'
+      ? '不限定地理原产地'
+      : 'No single geographic origin'
+    : t[breed.confidence]
+  const countriesValue = breed.atlasKind === 'coatPattern'
+    ? language === 'zh'
+      ? '可出现在不同地区'
+      : 'Can appear in many regions'
+    : breed.countries.join(', ')
+
   return [
     [t.origin, breed.originLabel],
-    [t.coordinate, t[breed.confidence]],
+    [t.coordinate, coordinateValue],
     [t.size, breed.detailFacts.size],
     [t.lifespan, breed.detailFacts.lifespan],
     [t.care, breed.detailFacts.care],
-    [t.countries, breed.countries.join(', ')],
+    [t.countries, countriesValue],
   ] as const
 }
 
@@ -810,35 +1205,6 @@ const photoStyleFor = (breed: BreedOrigin) => ({
   objectFit: breed.photo.fit ?? 'cover',
   objectPosition: breed.photo.objectPosition ?? '50% 38%',
 })
-
-const postcardPhotoStyleFor = (breed: BreedOrigin) => ({
-  objectFit: 'contain' as const,
-  objectPosition: breed.photo.objectPosition ?? '50% 42%',
-})
-
-const playSoftUiSound = () => {
-  if (typeof window === 'undefined') return
-  const AudioContextClass = window.AudioContext
-    ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-  if (!AudioContextClass) return
-
-  const audio = new AudioContextClass()
-  const oscillator = audio.createOscillator()
-  const gain = audio.createGain()
-  oscillator.type = 'sine'
-  oscillator.frequency.setValueAtTime(660, audio.currentTime)
-  oscillator.frequency.exponentialRampToValueAtTime(420, audio.currentTime + 0.14)
-  gain.gain.setValueAtTime(0.001, audio.currentTime)
-  gain.gain.exponentialRampToValueAtTime(0.035, audio.currentTime + 0.02)
-  gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.18)
-  oscillator.connect(gain)
-  gain.connect(audio.destination)
-  oscillator.start()
-  oscillator.stop(audio.currentTime + 0.2)
-  window.setTimeout(() => {
-    void audio.close()
-  }, 260)
-}
 
 export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   const workspaceRef = useRef<HTMLDivElement | null>(null)
@@ -851,6 +1217,8 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   const setSearchQuery = useCatPlanetStore((state) => state.setSearchQuery)
   const coatFilter = useCatPlanetStore((state) => state.coatFilter)
   const setCoatFilter = useCatPlanetStore((state) => state.setCoatFilter)
+  const atlasKindFilter = useCatPlanetStore((state) => state.atlasKindFilter)
+  const setAtlasKindFilter = useCatPlanetStore((state) => state.setAtlasKindFilter)
   const selectedBreedId = useCatPlanetStore((state) => state.selectedBreedId)
   const hoveredBreedId = useCatPlanetStore((state) => state.hoveredBreedId)
   const tooltipPosition = useCatPlanetStore((state) => state.tooltipPosition)
@@ -862,26 +1230,48 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   const compareBreedIds = useCatPlanetStore((state) => state.compareBreedIds)
   const favoriteBreedIds = useCatPlanetStore((state) => state.favoriteBreedIds)
   const dailyBreedId = useCatPlanetStore((state) => state.dailyBreedId)
-  const soundEnabled = useCatPlanetStore((state) => state.soundEnabled)
   const guardianBirthday = useCatPlanetStore((state) => state.guardianBirthday)
   const guardianZodiacId = useCatPlanetStore((state) => state.guardianZodiacId)
   const guardianBreedIds = useCatPlanetStore((state) => state.guardianBreedIds)
-  const shareCardMode = useCatPlanetStore((state) => state.shareCardMode)
-  const shareCardSide = useCatPlanetStore((state) => state.shareCardSide)
+  const exploredBreedIds = useCatPlanetStore((state) => state.exploredBreedIds)
+  const companionBreedId = useCatPlanetStore((state) => state.companionBreedId)
+  const companionCollapsed = useCatPlanetStore((state) => state.companionCollapsed)
+  const homeCatBreedId = useCatPlanetStore((state) => state.homeCatBreedId)
+  const homeMood = useCatPlanetStore((state) => state.homeMood)
+  const homeStats = useCatPlanetStore((state) => state.homeStats)
+  const homeLevel = useCatPlanetStore((state) => state.homeLevel)
+  const homeXp = useCatPlanetStore((state) => state.homeXp)
+  const homeStardust = useCatPlanetStore((state) => state.homeStardust)
+  const homeDailyWish = useCatPlanetStore((state) => state.homeDailyWish)
+  const homeDiaryEntries = useCatPlanetStore((state) => state.homeDiaryEntries)
+  const homeUnlockedDecorIds = useCatPlanetStore((state) => state.homeUnlockedDecorIds)
+  const homeEquippedDecorIds = useCatPlanetStore((state) => state.homeEquippedDecorIds)
+  const homeInteractionMode = useCatPlanetStore((state) => state.homeInteractionMode)
+  const homeLastAction = useCatPlanetStore((state) => state.homeLastAction)
+  const compareDropHintSeen = useCatPlanetStore((state) => state.compareDropHintSeen)
   const toggleFavoriteBreed = useCatPlanetStore((state) => state.toggleFavoriteBreed)
   const toggleCompareBreed = useCatPlanetStore((state) => state.toggleCompareBreed)
   const clearCompare = useCatPlanetStore((state) => state.clearCompare)
-  const setSoundEnabled = useCatPlanetStore((state) => state.setSoundEnabled)
   const setGuardianMatch = useCatPlanetStore((state) => state.setGuardianMatch)
-  const setShareCardMode = useCatPlanetStore((state) => state.setShareCardMode)
-  const setShareCardSide = useCatPlanetStore((state) => state.setShareCardSide)
+  const recordBreedExploration = useCatPlanetStore((state) => state.recordBreedExploration)
+  const setCompanionBreed = useCatPlanetStore((state) => state.setCompanionBreed)
+  const setCompanionCollapsed = useCatPlanetStore((state) => state.setCompanionCollapsed)
+  const setHomeCatBreed = useCatPlanetStore((state) => state.setHomeCatBreed)
+  const clearHomeCatBreed = useCatPlanetStore((state) => state.clearHomeCatBreed)
+  const performHomeAction = useCatPlanetStore((state) => state.performHomeAction)
+  const checkInHome = useCatPlanetStore((state) => state.checkInHome)
+  const completeDailyWish = useCatPlanetStore((state) => state.completeDailyWish)
+  const equipHomeDecor = useCatPlanetStore((state) => state.equipHomeDecor)
+  const setCompareDropHintSeen = useCatPlanetStore((state) => state.setCompareDropHintSeen)
   const t = copy[language]
 
   const selectedBreed = getBreedById(selectedBreedId)
   const hoveredBreed = getBreedById(hoveredBreedId)
   const tooltipBreed = hoveredBreed ?? selectedBreed
-  const visibleBreeds = getVisibleBreeds(activeRegion, searchQuery, coatFilter)
+  const visibleBreeds = getVisibleBreeds(activeRegion, searchQuery, coatFilter, atlasKindFilter)
   const dailyBreed = getBreedById(dailyBreedId)
+  const companionBreed = getBreedById(companionBreedId)
+  const homeCatBreed = getBreedById(homeCatBreedId)
 
   useEffect(() => {
     if (!uiVisible || !motionReady || !workspaceRef.current) return
@@ -978,6 +1368,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   }, [
     activeRegion,
     coatFilter,
+    atlasKindFilter,
     language,
     searchQuery,
     selectedBreedId,
@@ -993,7 +1384,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
     const detailItems = workspaceRef.current?.querySelectorAll<HTMLElement>(
       '.detail-photo, .detail-kicker, .detail-hero, .summary, .alias-panel, .detail-panel section',
     )
-    if (!detailItems) return
+    if (!detailItems || detailItems.length === 0) return
 
     const reduceMotion = prefersReducedMotion()
     const context = gsap.context(() => {
@@ -1043,6 +1434,12 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   }, [language, motionReady, selectedBreedId])
 
   useEffect(() => {
+    if (activeExperience === 'passport') {
+      checkInHome()
+    }
+  }, [activeExperience, checkInHome])
+
+  useEffect(() => {
     if (!uiVisible || !motionReady || !workspaceRef.current) return
 
     const reduceMotion = prefersReducedMotion()
@@ -1069,6 +1466,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   }, [
     activeRegion,
     coatFilter,
+    atlasKindFilter,
     language,
     motionReady,
     searchQuery,
@@ -1163,10 +1561,40 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
   const handleRegionSelect = (region: Region) => {
     setActiveRegion(region)
     flyTo(regionTargets[region])
-    if (soundEnabled) playSoftUiSound()
+  }
+
+  const handleAtlasKindFilterSelect = (filter: AtlasKindFilter) => {
+    setAtlasKindFilter(filter)
+    if (filter === 'localAndPattern') {
+      setActiveRegion('Global')
+      flyTo(regionTargets.Global)
+    }
   }
 
   const handleBreedSelect = (breed: BreedOrigin) => {
+    setActiveExperience('atlas')
+    recordBreedExploration(breed.id, passportRegionForBreed(breed))
+    completeDailyWish({
+      kind: 'explore',
+      breedId: breed.id,
+      region: breed.region,
+      personalityZoneIds: personalityZoneIdsForBreed(breed),
+    })
+    if (breed.atlasKind === 'coatPattern') {
+      setActiveRegion('Global')
+      flyTo(
+        {
+          ...regionTargets.Global,
+          label: breed.ticaName,
+          lat: regionTargets.Global.lat,
+          lon: regionTargets.Global.lon,
+          distance: 3.55,
+        },
+        breed.id,
+      )
+      return
+    }
+
     setActiveRegion(breed.region)
     flyTo(
       {
@@ -1178,18 +1606,30 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
       },
       breed.id,
     )
-    if (soundEnabled) playSoftUiSound()
+  }
+
+  const handleSetGuardianMatch = (
+    birthday: GuardianBirthday,
+    zodiacId: string,
+    breedIds: string[],
+  ) => {
+    setGuardianMatch(birthday, zodiacId, breedIds)
+    const primaryBreedId = breedIds[0] ?? null
+    if (primaryBreedId) {
+      const breed = getBreedById(primaryBreedId)
+      if (breed) recordBreedExploration(breed.id, passportRegionForBreed(breed))
+      setCompanionBreed(primaryBreedId)
+    }
   }
 
   const handleExperienceSelect = (experience: ActiveExperience) => {
     setActiveExperience(experience)
-    if (soundEnabled) playSoftUiSound()
   }
 
   const handleRouteStopSelect = (breed: BreedOrigin, lat: number, lon: number, label: string) => {
+    setActiveExperience('atlas')
     setActiveRegion(breed.region)
     flyTo({ ...regionTargets[breed.region], label, lat, lon, distance: 2.58 }, breed.id)
-    if (soundEnabled) playSoftUiSound()
   }
 
   return (
@@ -1221,6 +1661,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
           ref={workspaceRef}
           className="workspace-shell"
           data-experience={activeExperience}
+          data-has-selection={Boolean(selectedBreed)}
           aria-label="Cat planet controls"
         >
           <aside className="control-panel">
@@ -1268,7 +1709,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
               language={language}
               onSelect={handleExperienceSelect}
               compareCount={compareBreedIds.length}
-              favoriteCount={favoriteBreedIds.length}
+              favoriteCount={favoriteBreedIds.length || exploredBreedIds.length}
             />
 
             {dailyBreed && (
@@ -1305,6 +1746,20 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
               ))}
             </div>
 
+            <div className="atlas-kind-filter" aria-label="Cat atlas type filter">
+              {atlasKindFilters.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  className={filter === atlasKindFilter ? 'active' : ''}
+                  data-atlas-kind={filter}
+                  onClick={() => handleAtlasKindFilterSelect(filter)}
+                >
+                  {atlasKindFilterLabel[language][filter]}
+                </button>
+              ))}
+            </div>
+
             <div className="region-grid" aria-label={t.regions}>
               {regions.map((region) => (
                 <button
@@ -1316,7 +1771,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
                   onClick={() => handleRegionSelect(region)}
                 >
                   <span>{regionLabel[language][region]}</span>
-                  <strong>{regionCount(region, coatFilter)}</strong>
+                  <strong>{regionCount(region, coatFilter, atlasKindFilter)}</strong>
                 </button>
               ))}
             </div>
@@ -1340,7 +1795,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
             </div>
           </aside>
 
-          <section className="detail-panel" aria-live="polite">
+          <section className="detail-panel" aria-live="polite" hidden={activeExperience !== 'atlas'}>
             {selectedBreed ? (
               <BreedDetail
                 breed={selectedBreed}
@@ -1351,6 +1806,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
                 onToggleFavorite={toggleFavoriteBreed}
                 onToggleCompare={toggleCompareBreed}
                 onOpenRoute={() => setActiveExperience('route')}
+                onOpenStory={(breedId) => completeDailyWish({ kind: 'story', breedId })}
               />
             ) : (
               <div className="empty-detail">
@@ -1362,13 +1818,6 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
             )}
           </section>
 
-          {!selectedBreed && (
-            <div className="scene-caption" aria-hidden="true">
-              <span>Cat Atlas</span>
-              <small>{t.emptyTitle}</small>
-            </div>
-          )}
-
           {activeExperience !== 'atlas' && (
             <ExperiencePanel
               activeExperience={activeExperience}
@@ -1376,22 +1825,38 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
               selectedBreed={selectedBreed}
               compareBreedIds={compareBreedIds}
               favoriteBreedIds={favoriteBreedIds}
-              soundEnabled={soundEnabled}
               guardianBirthday={guardianBirthday}
               guardianZodiacId={guardianZodiacId}
               guardianBreedIds={guardianBreedIds}
-              shareCardMode={shareCardMode}
-              shareCardSide={shareCardSide}
+              exploredBreedIds={exploredBreedIds}
+              dailyBreedId={dailyBreedId}
+              companionBreedId={companionBreedId}
+              homeCatBreedId={homeCatBreedId}
+              homeMood={homeMood}
+              homeStats={homeStats}
+              homeLevel={homeLevel}
+              homeXp={homeXp}
+              homeStardust={homeStardust}
+              homeDailyWish={homeDailyWish}
+              homeDiaryEntries={homeDiaryEntries}
+              homeUnlockedDecorIds={homeUnlockedDecorIds}
+              homeEquippedDecorIds={homeEquippedDecorIds}
+              homeInteractionMode={homeInteractionMode}
+              homeLastAction={homeLastAction}
+              compareDropHintSeen={compareDropHintSeen}
               onSelectExperience={handleExperienceSelect}
               onSelectBreed={handleBreedSelect}
               onRouteStop={handleRouteStopSelect}
               onClearCompare={clearCompare}
               onToggleCompare={toggleCompareBreed}
               onToggleFavorite={toggleFavoriteBreed}
-              onSetGuardianMatch={setGuardianMatch}
-              onSetShareCardMode={setShareCardMode}
-              onSetShareCardSide={setShareCardSide}
-              onToggleSound={() => setSoundEnabled(!soundEnabled)}
+              onSetGuardianMatch={handleSetGuardianMatch}
+              onSetHomeCatBreed={setHomeCatBreed}
+              onClearHomeCatBreed={clearHomeCatBreed}
+              onPerformHomeAction={performHomeAction}
+              onCompleteDailyWish={completeDailyWish}
+              onEquipHomeDecor={equipHomeDecor}
+              onSetCompareDropHintSeen={setCompareDropHintSeen}
             />
           )}
 
@@ -1410,7 +1875,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
                     data-region={region}
                     onClick={() => handleRegionSelect(region)}
                   >
-                    {regionLabel[language][region]} {regionCount(region, coatFilter)}
+                    {regionLabel[language][region]} {regionCount(region, coatFilter, atlasKindFilter)}
                   </button>
                 ))}
               </div>
@@ -1419,7 +1884,7 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
         </div>
       )}
 
-      {tooltipBreed && tooltipPosition.visible && (
+      {activeExperience === 'atlas' && tooltipBreed && tooltipPosition.visible && (
         <div
           ref={tooltipRef}
           className="breed-tooltip"
@@ -1451,6 +1916,19 @@ export function CatPlanetUI({ motionReady = true }: { motionReady?: boolean }) {
           <small>{tooltipBreed.originLabel}</small>
         </div>
       )}
+
+      {uiVisible && (
+        <CompanionCabin
+          activeExperience={activeExperience}
+          language={language}
+          breed={homeCatBreed ?? companionBreed ?? selectedBreed ?? dailyBreed ?? null}
+          mood={homeMood}
+          collapsed={companionCollapsed}
+          exploredCount={exploredBreedIds.length}
+          onCollapseChange={setCompanionCollapsed}
+          onOpenPassport={() => handleExperienceSelect('passport')}
+        />
+      )}
     </>
   )
 }
@@ -1469,20 +1947,32 @@ function BreedListItem({
   onSelect: (breed: BreedOrigin) => void
 }) {
   const hint = getBreedSearchHint(breed, searchQuery, language)
+  const originText = breed.atlasKind === 'coatPattern'
+    ? language === 'zh'
+      ? `${breed.ticaName} · 不限定地理原产地`
+      : `${breed.ticaName} · No single geographic origin`
+    : `${breed.ticaName} · ${breed.originLabel}`
 
   return (
     <button
       type="button"
       className={selected ? 'active' : ''}
       data-breed-id={breed.id}
+      data-drag-breed-id={breed.id}
       data-active={selected}
       onClick={() => onSelect(breed)}
     >
+      <span className="drag-grip breed-drag-grip" aria-hidden="true">
+        {language === 'zh' ? '拖' : 'drag'}
+      </span>
       <CatAvatar tone={catToneFor(breed.id)} />
       <span>
         <strong>{breed.localized[language].name}</strong>
         <small>
-          {breed.ticaName} · {breed.originLabel}
+          <span className={`atlas-kind-badge ${breed.atlasKind}`}>
+            {atlasKindLabel[language][breed.atlasKind]}
+          </span>
+          {originText}
         </small>
         {hint && <em className="match-hint">{hint}</em>}
       </span>
@@ -1566,6 +2056,7 @@ function BreedDetail({
   onToggleFavorite,
   onToggleCompare,
   onOpenRoute,
+  onOpenStory,
 }: {
   breed: BreedOrigin
   language: Language
@@ -1575,6 +2066,7 @@ function BreedDetail({
   onToggleFavorite: (id: string) => void
   onToggleCompare: (id: string) => void
   onOpenRoute: () => void
+  onOpenStory: (breedId: string) => void
 }) {
   const t = copy[language]
   const localized = breed.localized[language]
@@ -1585,6 +2077,7 @@ function BreedDetail({
   const storyTone = storyToneFor(story)
   const storySourceLabel = storySourceTypeLabel[language][story.sourceType]
   const photoAlt = language === 'zh' ? breed.photo.altZh : breed.photo.altEn
+  const detailPhotoSrc = breed.photo.markerSrc ?? breed.photo.src
   const aliases = breed.zhAliases.length > 0 ? breed.zhAliases : [breed.zhName]
   const traits = getLocalizedTraits(breed, language)
   const facts = factItems(breed, language)
@@ -1602,21 +2095,32 @@ function BreedDetail({
     <article data-testid="breed-detail" data-breed-id={breed.id}>
       <div className="detail-photo">
         <img
-          src={breed.photo.src}
+          src={detailPhotoSrc}
           alt={photoAlt}
           loading="lazy"
+          onError={(event) => {
+            event.currentTarget.hidden = true
+          }}
           style={{
             objectFit: breed.photo.fit ?? 'cover',
-            objectPosition: breed.photo.objectPosition ?? '50% 38%',
+            objectPosition:
+              breed.photo.markerObjectPosition
+              ?? breed.photo.objectPosition
+              ?? '50% 38%',
           }}
         />
+        <CatAvatar tone={catToneFor(breed.id)} className="detail-photo-fallback" />
         <div className="detail-photo-badge">
           <Image size={14} />
           <span>{breed.photo.license}</span>
         </div>
       </div>
 
-      <div className="detail-kicker">{regionLabel[language][breed.region]}</div>
+      <div className="detail-kicker">
+        {breed.atlasKind === 'coatPattern'
+          ? atlasKindLabel[language][breed.atlasKind]
+          : regionLabel[language][breed.region]}
+      </div>
       <div className="detail-hero">
         <CatAvatar tone={catToneFor(breed.id)} className="detail-cat" />
         <div>
@@ -1626,6 +2130,10 @@ function BreedDetail({
       </div>
 
       <p className="summary">{localized.summary}</p>
+      <div className={`classification-note ${breed.atlasKind}`}>
+        <span>{atlasKindLabel[language][breed.atlasKind]}</span>
+        <p>{language === 'zh' ? breed.classificationNoteZh : breed.classificationNoteEn}</p>
+      </div>
 
       <div className="detail-actions">
         <button type="button" className={favorite ? 'active' : ''} onClick={() => onToggleFavorite(breed.id)}>
@@ -1702,7 +2210,7 @@ function BreedDetail({
           <span>{language === 'zh' ? '品种专属线索' : 'Breed-specific lead'}</span>
         </div>
         <p className="story-evidence">{storyEvidence}</p>
-        <a href={story.sourceUrl} target="_blank" rel="noreferrer">
+        <a href={story.sourceUrl} target="_blank" rel="noreferrer" onClick={() => onOpenStory(breed.id)}>
           {story.sourceName}
           <ExternalLink size={14} />
         </a>
@@ -1722,6 +2230,7 @@ function BreedDetail({
               rel="noreferrer"
               className="external-story-card"
               data-external-story
+              onClick={() => onOpenStory(breed.id)}
             >
               <span className={`external-story-tone ${story.tone}`}>
                 {externalStoryToneLabel[language][story.tone]}
@@ -1832,12 +2341,25 @@ function ExperiencePanel({
   selectedBreed,
   compareBreedIds,
   favoriteBreedIds,
-  soundEnabled,
   guardianBirthday,
   guardianZodiacId,
   guardianBreedIds,
-  shareCardMode,
-  shareCardSide,
+  exploredBreedIds,
+  dailyBreedId,
+  companionBreedId,
+  homeCatBreedId,
+  homeMood,
+  homeStats,
+  homeLevel,
+  homeXp,
+  homeStardust,
+  homeDailyWish,
+  homeDiaryEntries,
+  homeUnlockedDecorIds,
+  homeEquippedDecorIds,
+  homeInteractionMode,
+  homeLastAction,
+  compareDropHintSeen,
   onSelectExperience,
   onSelectBreed,
   onRouteStop,
@@ -1845,21 +2367,37 @@ function ExperiencePanel({
   onToggleCompare,
   onToggleFavorite,
   onSetGuardianMatch,
-  onSetShareCardMode,
-  onSetShareCardSide,
-  onToggleSound,
+  onSetHomeCatBreed,
+  onClearHomeCatBreed,
+  onPerformHomeAction,
+  onCompleteDailyWish,
+  onEquipHomeDecor,
+  onSetCompareDropHintSeen,
 }: {
   activeExperience: ActiveExperience
   language: Language
   selectedBreed: BreedOrigin | null
   compareBreedIds: string[]
   favoriteBreedIds: string[]
-  soundEnabled: boolean
   guardianBirthday: GuardianBirthday | null
   guardianZodiacId: string | null
   guardianBreedIds: string[]
-  shareCardMode: ShareCardMode
-  shareCardSide: ShareCardSide
+  exploredBreedIds: string[]
+  dailyBreedId: string | null
+  companionBreedId: string | null
+  homeCatBreedId: string | null
+  homeMood: HomeMood
+  homeStats: HomeStatsState
+  homeLevel: number
+  homeXp: number
+  homeStardust: number
+  homeDailyWish: HomeDailyWish
+  homeDiaryEntries: HomeDiaryEntry[]
+  homeUnlockedDecorIds: HomeDecorId[]
+  homeEquippedDecorIds: HomeDecorId[]
+  homeInteractionMode: HomeInteractionMode
+  homeLastAction: HomeAction | null
+  compareDropHintSeen: boolean
   onSelectExperience: (experience: ActiveExperience) => void
   onSelectBreed: (breed: BreedOrigin) => void
   onRouteStop: (breed: BreedOrigin, lat: number, lon: number, label: string) => void
@@ -1871,29 +2409,40 @@ function ExperiencePanel({
     zodiacId: string,
     breedIds: string[],
   ) => void
-  onSetShareCardMode: (mode: ShareCardMode) => void
-  onSetShareCardSide: (side: ShareCardSide) => void
-  onToggleSound: () => void
+  onSetHomeCatBreed: (id: string | null) => void
+  onClearHomeCatBreed: () => void
+  onPerformHomeAction: (action: HomeAction) => void
+  onCompleteDailyWish: (source: {
+    kind: 'care' | 'explore' | 'story' | 'favorite' | 'compare'
+    action?: HomeAction
+    region?: Region
+    personalityZoneIds?: PersonalityZoneId[]
+    breedId?: string
+  }) => void
+  onEquipHomeDecor: (decorId: HomeDecorId) => void
+  onSetCompareDropHintSeen: (seen: boolean) => void
 }) {
   const panelRef = useRef<HTMLDivElement | null>(null)
   const t = copy[language]
 
-  useEffect(() => {
+  useGSAP(() => {
     if (!panelRef.current) return
     const reduceMotion = prefersReducedMotion()
-    const context = gsap.context(() => {
+    gsap.fromTo(
+      panelRef.current,
+      { autoAlpha: 0, filter: 'blur(8px)', scale: 0.985 },
+      {
+        autoAlpha: 1,
+        filter: 'blur(0px)',
+        scale: 1,
+        duration: reduceMotion ? 0.01 : 0.34,
+        ease: 'power3.out',
+      },
+    )
+    const items = panelRef.current.querySelectorAll('[data-animate-item]')
+    if (items.length > 0) {
       gsap.fromTo(
-        panelRef.current,
-        { autoAlpha: 0, filter: 'blur(8px)' },
-        {
-          autoAlpha: 1,
-          filter: 'blur(0px)',
-          duration: reduceMotion ? 0.01 : 0.34,
-          ease: 'power3.out',
-        },
-      )
-      gsap.fromTo(
-        '.experience-panel [data-animate-item]',
+        items,
         { autoAlpha: 0, y: 12 },
         {
           autoAlpha: 1,
@@ -1903,9 +2452,8 @@ function ExperiencePanel({
           stagger: reduceMotion ? 0 : 0.035,
         },
       )
-    }, panelRef)
-    return () => context.revert()
-  }, [activeExperience, language])
+    }
+  }, { scope: panelRef, dependencies: [activeExperience, language] })
 
   return (
     <section ref={panelRef} className="experience-panel" data-experience={activeExperience}>
@@ -1921,13 +2469,12 @@ function ExperiencePanel({
                   ? t.compare
                   : activeExperience === 'constellation'
                     ? t.constellationTitle
-                    : t.passportTitle}
+                    : activeExperience === 'personalityMap'
+                      ? t.personalityMapTitle
+                      : t.catHomeTitle}
           </h2>
         </div>
         <div className="experience-panel-actions">
-          <button type="button" onClick={onToggleSound} title={soundEnabled ? t.soundOn : t.soundOff}>
-            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          </button>
           <button type="button" onClick={() => onSelectExperience('atlas')}>{t.atlas}</button>
         </div>
       </div>
@@ -1947,8 +2494,21 @@ function ExperiencePanel({
         <CompareExperience
           language={language}
           compareBreedIds={compareBreedIds}
+          compareDropHintSeen={compareDropHintSeen}
           onSelectBreed={onSelectBreed}
           onClearCompare={onClearCompare}
+          onToggleCompare={onToggleCompare}
+          onSetCompareDropHintSeen={onSetCompareDropHintSeen}
+        />
+      )}
+      {activeExperience === 'personalityMap' && (
+        <PersonalityMapExperience
+          language={language}
+          compareBreedIds={compareBreedIds}
+          homeCatBreedId={homeCatBreedId}
+          onSelectBreed={onSelectBreed}
+          onToggleCompare={onToggleCompare}
+          onSetHomeCatBreed={onSetHomeCatBreed}
         />
       )}
       {activeExperience === 'constellation' && (
@@ -1966,20 +2526,33 @@ function ExperiencePanel({
         />
       )}
       {activeExperience === 'passport' && (
-        <PassportExperience
+        <CatHomeExperience
           language={language}
+          exploredBreedIds={exploredBreedIds}
           favoriteBreedIds={favoriteBreedIds}
-          guardianBirthday={guardianBirthday}
-          guardianZodiacId={guardianZodiacId}
           guardianBreedIds={guardianBreedIds}
-          shareCardMode={shareCardMode}
-          shareCardSide={shareCardSide}
+          dailyBreedId={dailyBreedId}
+          companionBreedId={companionBreedId}
+          homeCatBreedId={homeCatBreedId}
+          homeMood={homeMood}
+          homeStats={homeStats}
+          homeLevel={homeLevel}
+          homeXp={homeXp}
+          homeStardust={homeStardust}
+          homeDailyWish={homeDailyWish}
+          homeDiaryEntries={homeDiaryEntries}
+          homeUnlockedDecorIds={homeUnlockedDecorIds}
+          homeEquippedDecorIds={homeEquippedDecorIds}
+          homeInteractionMode={homeInteractionMode}
+          homeLastAction={homeLastAction}
           compareBreedIds={compareBreedIds}
           onSelectBreed={onSelectBreed}
           onToggleCompare={onToggleCompare}
-          onSetShareCardMode={onSetShareCardMode}
-          onSetShareCardSide={onSetShareCardSide}
-          onSelectExperience={onSelectExperience}
+          onSetHomeCatBreed={onSetHomeCatBreed}
+          onClearHomeCatBreed={onClearHomeCatBreed}
+          onPerformHomeAction={onPerformHomeAction}
+          onCompleteDailyWish={onCompleteDailyWish}
+          onEquipHomeDecor={onEquipHomeDecor}
         />
       )}
     </section>
@@ -1997,8 +2570,11 @@ function RouteExperience({
   onSelectBreed: (breed: BreedOrigin) => void
   onRouteStop: (breed: BreedOrigin, lat: number, lon: number, label: string) => void
 }) {
-  const routeBreeds = breeds.filter((breed) => breed.explorationRoute)
-  const breed = selectedBreed?.explorationRoute ? selectedBreed : routeBreeds[0]
+  const routeBreeds = breeds.filter((breed) =>
+    breed.atlasKind === 'formalBreed' && breed.explorationRoute)
+  const breed = selectedBreed?.atlasKind === 'formalBreed' && selectedBreed.explorationRoute
+    ? selectedBreed
+    : routeBreeds[0]
   const route = breed?.explorationRoute
 
   if (!breed || !route) return <p className="experience-empty">{copy[language].noRoute}</p>
@@ -2097,6 +2673,7 @@ function QuizExperience({
 
   const results = useMemo(() => {
     return [...breeds]
+      .filter((breed) => breed.atlasKind !== 'coatPattern')
       .map((breed) => ({
         breed,
         score: radarKeys.reduce((sum, key) => sum + Math.abs(breed.personalityRadar[key] - target[key]), 0),
@@ -2208,61 +2785,497 @@ function QuizExperience({
 function CompareExperience({
   language,
   compareBreedIds,
+  compareDropHintSeen,
   onSelectBreed,
   onClearCompare,
+  onToggleCompare,
+  onSetCompareDropHintSeen,
 }: {
   language: Language
   compareBreedIds: string[]
+  compareDropHintSeen: boolean
   onSelectBreed: (breed: BreedOrigin) => void
   onClearCompare: () => void
+  onToggleCompare: (id: string) => void
+  onSetCompareDropHintSeen: (seen: boolean) => void
 }) {
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const dropRef = useRef<HTMLDivElement | null>(null)
   const compareBreeds = compareBreedIds
     .map((id) => getBreedById(id))
     .filter((breed): breed is BreedOrigin => Boolean(breed))
+  const dragSourceBreeds = useMemo(() => {
+    const selected = compareBreeds[0]
+    const pool = [
+      selected,
+      ...breeds.filter((breed) => breed.atlasKind !== 'coatPattern'),
+    ].filter((breed): breed is BreedOrigin => Boolean(breed))
+    return [...new Map(pool.map((breed) => [breed.id, breed])).values()].slice(0, 8)
+  }, [compareBreeds])
+  const dropCopy = compareBreedIds.length >= 3 ? copy[language].compareDropFull : copy[language].compareDropHint
+
+  useGSAP((_, contextSafe) => {
+    const root = rootRef.current
+    const dropZone = dropRef.current
+    if (!root || !dropZone) return
+
+    const reduceMotion = prefersReducedMotion()
+    let dragGhost: HTMLElement | null = null
+    const showDropFeedback = (contextSafe ?? ((fn: (accepted: boolean) => void) => fn))((accepted: boolean) => {
+      gsap.fromTo(
+        dropZone,
+        {
+          scale: accepted ? 0.98 : 1,
+          x: 0,
+          filter: accepted
+            ? 'brightness(1.08) saturate(1.14)'
+            : 'brightness(1) saturate(1)',
+        },
+        {
+          scale: 1,
+          x: accepted ? 0 : 8,
+          filter: 'brightness(1) saturate(1)',
+          duration: reduceMotion ? 0.01 : 0.26,
+          ease: accepted ? 'back.out(1.7)' : 'power2.out',
+          yoyo: !accepted,
+          repeat: accepted || reduceMotion ? 0 : 3,
+        },
+      )
+    })
+
+    const dragTargets = [
+      ...Array.from(document.querySelectorAll<HTMLElement>('.screen-marker-button.is-single[data-drag-breed-id], .screen-marker-item[data-drag-breed-id]')),
+      ...Array.from(root.querySelectorAll<HTMLElement>('[data-compare-drag-source="true"]')),
+    ].filter((target) => Boolean(target.dataset.dragBreedId))
+
+    const pointerInDropZone = (event?: MouseEvent | PointerEvent | TouchEvent) => {
+      const rect = dropZone.getBoundingClientRect()
+      const point = (() => {
+        if (event && 'changedTouches' in event && event.changedTouches.length > 0) {
+          return event.changedTouches[0]
+        }
+        if (event && 'clientX' in event) return event
+        return null
+      })()
+      if (!point) return false
+      return point.clientX >= rect.left
+        && point.clientX <= rect.right
+        && point.clientY >= rect.top
+        && point.clientY <= rect.bottom
+    }
+
+    const addBreedFromDrop = (breedId: string) => {
+      if (compareBreedIds.includes(breedId)) {
+        showDropFeedback(true)
+        return
+      }
+      if (compareBreedIds.length >= 3) {
+        showDropFeedback(false)
+        return
+      }
+      const state = Flip.getState(root.querySelectorAll('.compare-card'))
+      onToggleCompare(breedId)
+      onSetCompareDropHintSeen(true)
+      showDropFeedback(true)
+      window.requestAnimationFrame(() => {
+        Flip.from(state, {
+          duration: reduceMotion ? 0.01 : 0.38,
+          ease: 'power3.out',
+          absolute: true,
+          simple: true,
+          stagger: reduceMotion ? 0 : 0.035,
+        })
+      })
+    }
+
+    const cleanupFns: Array<() => void> = []
+    dragTargets.forEach((target) => {
+      let dragging = false
+      let startX = 0
+      let startY = 0
+      let dropHovered = false
+      const breedId = target.dataset.dragBreedId
+      const breed = breedId ? getBreedById(breedId) : null
+
+      const removeGhost = () => {
+        if (!dragGhost) return
+        gsap.to(dragGhost, {
+          autoAlpha: 0,
+          scale: 0.86,
+          duration: reduceMotion ? 0.01 : 0.18,
+          ease: 'power2.out',
+          onComplete: () => {
+            dragGhost?.remove()
+            dragGhost = null
+          },
+        })
+      }
+
+      const beginDrag = (event: PointerEvent) => {
+        if (!breedId) return
+        target.dataset.compareDragSuppressClick = ''
+        startX = event.clientX
+        startY = event.clientY
+        dragging = false
+        target.setPointerCapture?.(event.pointerId)
+        window.addEventListener('pointermove', moveDrag)
+        window.addEventListener('pointerup', endDrag)
+        window.addEventListener('pointercancel', endDrag)
+      }
+
+      const moveDrag = (event: PointerEvent) => {
+        if (!breedId) return
+        const distance = Math.hypot(event.clientX - startX, event.clientY - startY)
+        if (!dragging && distance < 8) return
+        event.preventDefault()
+        if (!dragging) {
+          dragging = true
+          target.classList.add('is-dragging-cat')
+          dragGhost = document.createElement('div')
+          dragGhost.className = 'compare-drag-ghost'
+          dragGhost.innerHTML = breed?.photo.markerSrc || breed?.photo.src
+            ? `<img src="${breed.photo.markerSrc ?? breed.photo.src}" alt="" /><span>${breed.localized[language].name}</span>`
+            : `<span>${breed?.localized[language].name ?? ''}</span>`
+          document.body.appendChild(dragGhost)
+          gsap.set(dragGhost, { x: event.clientX + 14, y: event.clientY + 14, autoAlpha: 0, scale: 0.86 })
+          gsap.to(dragGhost, { autoAlpha: 1, scale: 1, duration: reduceMotion ? 0.01 : 0.16, ease: 'power2.out' })
+          gsap.to(target, {
+            scale: 1.05,
+            filter: 'brightness(1.08) saturate(1.1) drop-shadow(0 18px 28px rgba(74, 45, 54, 0.24))',
+            duration: reduceMotion ? 0.01 : 0.18,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          })
+          gsap.to(dropZone, {
+            scale: 1.02,
+            filter: 'brightness(1.05) saturate(1.08)',
+            duration: reduceMotion ? 0.01 : 0.18,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          })
+        }
+        if (dragGhost) gsap.set(dragGhost, { x: event.clientX + 14, y: event.clientY + 14 })
+        dropHovered = pointerInDropZone(event)
+        dropZone.classList.toggle('is-hovered', dropHovered)
+      }
+
+      const endDrag = (event: PointerEvent) => {
+        if (!breedId) return
+        window.removeEventListener('pointermove', moveDrag)
+        window.removeEventListener('pointerup', endDrag)
+        window.removeEventListener('pointercancel', endDrag)
+        target.releasePointerCapture?.(event.pointerId)
+        target.classList.remove('is-dragging-cat')
+        dropZone.classList.remove('is-hovered')
+        gsap.to(target, {
+          scale: 1,
+          filter: '',
+          duration: reduceMotion ? 0.01 : 0.2,
+          ease: 'power3.out',
+          clearProps: 'transform,filter',
+        })
+        gsap.to(dropZone, {
+          scale: 1,
+          filter: 'brightness(1) saturate(1)',
+          duration: reduceMotion ? 0.01 : 0.18,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        })
+        removeGhost()
+        if (!dragging) return
+        dragging = false
+        target.dataset.compareDragSuppressClick = 'true'
+        const acceptedDrop = dropHovered
+          || (dragGhost ? Draggable.hitTest(dragGhost, dropZone, '35%') : false)
+          || pointerInDropZone(event)
+        dropHovered = false
+        if (!acceptedDrop) {
+          showDropFeedback(false)
+          return
+        }
+        addBreedFromDrop(breedId)
+      }
+
+      const suppressDragClick = (event: MouseEvent) => {
+        if (target.dataset.compareDragSuppressClick !== 'true') return
+        event.preventDefault()
+        event.stopPropagation()
+        target.dataset.compareDragSuppressClick = ''
+      }
+
+      target.addEventListener('pointerdown', beginDrag)
+      target.addEventListener('click', suppressDragClick, true)
+      cleanupFns.push(() => {
+        target.removeEventListener('pointerdown', beginDrag)
+        target.removeEventListener('click', suppressDragClick, true)
+        window.removeEventListener('pointermove', moveDrag)
+        window.removeEventListener('pointerup', endDrag)
+        window.removeEventListener('pointercancel', endDrag)
+      })
+    })
+
+    if (!compareDropHintSeen && !reduceMotion) {
+      const demo = root.querySelector('.compare-demo-avatar')
+      gsap.timeline({ delay: 0.24, defaults: { ease: 'power3.out' } })
+        .fromTo(demo, { autoAlpha: 0, x: -44, y: -14, scale: 0.8 }, { autoAlpha: 1, x: 0, y: 0, scale: 1, duration: 0.34 })
+        .to(demo, { x: 78, y: 18, scale: 0.92, duration: 0.72, ease: 'power2.inOut' })
+        .to(dropZone, { scale: 1.03, duration: 0.18 }, '<0.46')
+        .to(demo, { autoAlpha: 0, scale: 0.72, duration: 0.22 })
+        .to(dropZone, { scale: 1, duration: 0.22 }, '<')
+      onSetCompareDropHintSeen(true)
+    }
+
+    return () => {
+      cleanupFns.forEach((cleanup) => cleanup())
+      dragGhost?.remove()
+    }
+  }, { scope: rootRef, dependencies: [compareBreedIds.join('|'), compareDropHintSeen, language, dragSourceBreeds.map((breed) => breed.id).join('|')], revertOnUpdate: true })
 
   return (
-    <div className="compare-panel" data-animate-item>
-      {compareBreeds.length < 2 ? (
+    <div ref={rootRef} className="compare-panel" data-animate-item>
+      <div ref={dropRef} className="compare-drop-zone">
+        <span className="compare-demo-avatar">
+          <Cat size={18} />
+        </span>
+        <GitCompare size={18} />
+        <strong>{copy[language].compareDropTitle}</strong>
+        <p>{dropCopy}</p>
+        <small>{compareBreedIds.length}/3</small>
+      </div>
+
+      <div className="compare-toolbar">
         <p className="experience-empty">{copy[language].compareEmpty}</p>
-      ) : (
-        <>
+        {compareBreeds.length > 0 && (
           <button type="button" className="clear-compare" onClick={onClearCompare}>
             {copy[language].clearCompare}
           </button>
-          <div className="compare-grid">
-            {compareBreeds.map((breed) => (
-              <article key={breed.id}>
-                <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
-                <h3>{breed.localized[language].name}</h3>
-                <p>{breed.originLabel}</p>
-                <dl className="compare-facts">
-                  <div>
-                    <dt>{copy[language].care}</dt>
-                    <dd>{breed.detailFacts.care}</dd>
-                  </div>
-                  <div>
-                    <dt>{coatLabel[language][breed.coatLength]}</dt>
-                    <dd>{breed.detailFacts.size}</dd>
-                  </div>
-                </dl>
-                <div className="mini-bars">
-                  {radarKeys.slice(0, 4).map((key) => (
-                    <div key={key}>
-                      <span>{radarLabel[language][key]}</span>
-                      <meter min="1" max="5" value={breed.personalityRadar[key]} />
-                    </div>
-                  ))}
+        )}
+      </div>
+
+      <section className="compare-source-strip" aria-label={language === 'zh' ? '可拖拽猫咪' : 'Draggable cats'}>
+        <div>
+          <strong>{language === 'zh' ? '从这里拖一只猫' : 'Drag a cat from here'}</strong>
+          <p>{language === 'zh' ? '也可以拖地球上的单只猫头像。松手到上方对比栏即可加入。' : 'You can also drag a single planet avatar. Drop it on the compare zone above.'}</p>
+        </div>
+        <div className="compare-source-grid">
+          {dragSourceBreeds.map((breed) => (
+            <button
+              key={breed.id}
+              type="button"
+              className="compare-source-card"
+              data-drag-breed-id={breed.id}
+              data-compare-drag-source="true"
+              onClick={() => onToggleCompare(breed.id)}
+              disabled={compareBreedIds.length >= 3 && !compareBreedIds.includes(breed.id)}
+            >
+              <span className="drag-grip" aria-hidden="true">{language === 'zh' ? '拖' : 'drag'}</span>
+              <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
+              <span>
+                <strong>{breed.localized[language].name}</strong>
+                <small>{compareBreedIds.includes(breed.id) ? copy[language].compareRemove : copy[language].compareAdd}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {compareBreeds.length > 0 && (
+        <div className="compare-grid">
+          {compareBreeds.map((breed) => (
+            <article key={breed.id} className="compare-card">
+              <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
+              <h3>{breed.localized[language].name}</h3>
+              <p>{breed.originLabel}</p>
+              <dl className="compare-facts">
+                <div>
+                  <dt>{copy[language].care}</dt>
+                  <dd>{breed.detailFacts.care}</dd>
                 </div>
-                <a href={breed.verifiedStory.sourceUrl} target="_blank" rel="noreferrer">
-                  {copy[language].storyEntry}
-                  <ExternalLink size={13} />
-                </a>
-                <button type="button" onClick={() => onSelectBreed(breed)}>{copy[language].landHere}</button>
-              </article>
-            ))}
-          </div>
-        </>
+                <div>
+                  <dt>{coatLabel[language][breed.coatLength]}</dt>
+                  <dd>{breed.detailFacts.size}</dd>
+                </div>
+              </dl>
+              <div className="mini-bars">
+                {radarKeys.slice(0, 4).map((key) => (
+                  <div key={key}>
+                    <span>{radarLabel[language][key]}</span>
+                    <meter min="1" max="5" value={breed.personalityRadar[key]} />
+                  </div>
+                ))}
+              </div>
+              <a href={breed.verifiedStory.sourceUrl} target="_blank" rel="noreferrer">
+                {copy[language].storyEntry}
+                <ExternalLink size={13} />
+              </a>
+              <button type="button" onClick={() => onSelectBreed(breed)}>{copy[language].landHere}</button>
+            </article>
+          ))}
+        </div>
       )}
+    </div>
+  )
+}
+
+function PersonalityMapExperience({
+  language,
+  compareBreedIds,
+  homeCatBreedId,
+  onSelectBreed,
+  onToggleCompare,
+  onSetHomeCatBreed,
+}: {
+  language: Language
+  compareBreedIds: string[]
+  homeCatBreedId: string | null
+  onSelectBreed: (breed: BreedOrigin) => void
+  onToggleCompare: (id: string) => void
+  onSetHomeCatBreed: (id: string | null) => void
+}) {
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const catGridRef = useRef<HTMLDivElement | null>(null)
+  const [activeZoneId, setActiveZoneId] = useState<PersonalityZoneId>('affectionate')
+  const activeZone = personalityZones.find((zone) => zone.id === activeZoneId) ?? personalityZones[0]
+  const zoneBreeds = breedsForPersonalityZone(activeZone.id, 8)
+
+  useGSAP(() => {
+    if (!rootRef.current) return
+    const reduceMotion = prefersReducedMotion()
+    const cards = rootRef.current.querySelectorAll('.personality-zone-card, .personality-cat-card')
+    if (cards.length > 0) {
+      gsap.fromTo(
+        cards,
+        { autoAlpha: 0, y: 18, scale: 0.96, filter: 'blur(8px)' },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: reduceMotion ? 0.01 : 0.34,
+          ease: 'power3.out',
+          stagger: reduceMotion ? 0 : { each: 0.035, from: 'start' },
+        },
+      )
+    }
+    const sparks = rootRef.current.querySelectorAll('.personality-zone-card.active .zone-spark')
+    if (sparks.length > 0) {
+      gsap.fromTo(
+        sparks,
+        { autoAlpha: 0, scale: 0.2, x: 0, y: 0 },
+        {
+          autoAlpha: 1,
+          scale: 1,
+          x: (index) => [16, -14, 8][index] ?? 0,
+          y: (index) => [-10, 12, 16][index] ?? 0,
+          duration: reduceMotion ? 0.01 : 0.42,
+          ease: 'back.out(1.8)',
+          stagger: reduceMotion ? 0 : 0.045,
+        },
+      )
+    }
+  }, { scope: rootRef, dependencies: [activeZoneId, language] })
+
+  const handleZoneSelect = (zoneId: PersonalityZoneId) => {
+    if (zoneId === activeZoneId) return
+    const state = catGridRef.current
+      ? Flip.getState(catGridRef.current.querySelectorAll('.personality-cat-card'))
+      : null
+    setActiveZoneId(zoneId)
+    if (state) {
+      window.requestAnimationFrame(() => {
+        Flip.from(state, {
+          duration: prefersReducedMotion() ? 0.01 : 0.36,
+          ease: 'power3.out',
+          absolute: true,
+          simple: true,
+          stagger: prefersReducedMotion() ? 0 : 0.035,
+        })
+      })
+    }
+  }
+
+  return (
+    <div ref={rootRef} className="personality-map-panel" data-animate-item>
+      <p>{copy[language].personalityMapIntro}</p>
+      <div className="personality-zone-grid">
+        {personalityZones.map((zone) => (
+          <button
+            key={zone.id}
+            type="button"
+            className={`personality-zone-card ${zone.id === activeZone.id ? 'active' : ''}`}
+            onClick={() => handleZoneSelect(zone.id)}
+          >
+            <span>{zone.icon}</span>
+            <i className="zone-spark spark-a" aria-hidden="true" />
+            <i className="zone-spark spark-b" aria-hidden="true" />
+            <i className="zone-spark spark-c" aria-hidden="true" />
+            <strong>{language === 'zh' ? zone.labelZh : zone.labelEn}</strong>
+            <small>{language === 'zh' ? zone.descriptionZh : zone.descriptionEn}</small>
+          </button>
+        ))}
+      </div>
+      <section className="personality-zone-detail">
+        <div className="personality-zone-heading">
+          <span>{activeZone.icon}</span>
+          <div>
+            <h3>{language === 'zh' ? activeZone.labelZh : activeZone.labelEn}</h3>
+            <p>{language === 'zh' ? activeZone.descriptionZh : activeZone.descriptionEn}</p>
+          </div>
+        </div>
+        {zoneBreeds.length === 0 ? (
+          <p className="experience-empty">{copy[language].personalityMapEmpty}</p>
+        ) : (
+          <div ref={catGridRef} className="personality-cat-grid">
+            {zoneBreeds.map((breed) => {
+              const compareSelected = compareBreedIds.includes(breed.id)
+              const compareFull = compareBreedIds.length >= 3 && !compareSelected
+              const isHomeCat = homeCatBreedId === breed.id
+              const zoneLabels = personalityZoneIdsForBreed(breed)
+                .map((id) => personalityZones.find((zone) => zone.id === id))
+                .filter((zone): zone is (typeof personalityZones)[number] => Boolean(zone))
+                .slice(0, 2)
+              return (
+                <article
+                  key={breed.id}
+                  className={`personality-cat-card ${isHomeCat ? 'is-home-cat' : ''}`}
+                  data-drag-breed-id={breed.id}
+                  data-compare-drag-source="true"
+                >
+                  <span className="drag-grip personality-drag-grip" aria-hidden="true">
+                    {language === 'zh' ? '拖' : 'drag'}
+                  </span>
+                  <button type="button" className="personality-cat-main" onClick={() => onSelectBreed(breed)}>
+                    <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
+                    <span>
+                      <strong>{breed.localized[language].name}</strong>
+                      <small>{getLocalizedTraits(breed, language).slice(0, 2).join(' / ')}</small>
+                    </span>
+                  </button>
+                  <div className="personality-tags">
+                    {zoneLabels.map((zone) => (
+                      <span key={zone.id}>{language === 'zh' ? zone.labelZh : zone.labelEn}</span>
+                    ))}
+                    {isHomeCat && <span>{language === 'zh' ? '小家猫咪' : 'Home cat'}</span>}
+                  </div>
+                  <div className="personality-card-actions">
+                    <button type="button" onClick={() => onSelectBreed(breed)}>{copy[language].landHere}</button>
+                    <button
+                      type="button"
+                      disabled={compareFull}
+                      onClick={() => onToggleCompare(breed.id)}
+                    >
+                      {compareSelected ? copy[language].compareRemove : copy[language].compareAdd}
+                    </button>
+                    <button type="button" onClick={() => onSetHomeCatBreed(breed.id)}>
+                      {copy[language].companionChoose}
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
@@ -2319,10 +3332,11 @@ function ConstellationExperience({
   useGSAP(() => {
     if (!rootRef.current) return
     const reduceMotion = prefersReducedMotion()
-    const dots = rootRef.current.querySelectorAll('.zodiac-orbit-dot')
+    const dots = rootRef.current.querySelectorAll('.zodiac-badge-spark')
     const cards = rootRef.current.querySelectorAll('.guardian-card, .guardian-reading-card')
-    const activeDot = rootRef.current.querySelector('.zodiac-orbit-dot.is-current')
+    const activeDot = rootRef.current.querySelector('.zodiac-badge-current')
     const orbit = rootRef.current.querySelector('.zodiac-orbit')
+    if (!orbit) return
     const timeline = gsap.timeline({
       defaults: {
         duration: reduceMotion ? 0.01 : 0.42,
@@ -2336,7 +3350,8 @@ function ConstellationExperience({
         { rotate: -18, scale: 0.94, filter: 'blur(4px)' },
         { rotate: 0, scale: 1, filter: 'blur(0px)' },
       )
-      .fromTo(
+    if (dots.length > 0) {
+      timeline.fromTo(
         dots,
         { autoAlpha: 0, scale: 0.22, y: 10 },
         {
@@ -2349,18 +3364,22 @@ function ConstellationExperience({
         },
         '<0.02',
       )
-      .to(
+    }
+    if (activeDot) {
+      timeline.to(
         activeDot,
         {
-          scale: 1.9,
+          scale: 1.08,
           autoAlpha: 1,
-          boxShadow: '0 0 22px rgba(255, 111, 159, 0.9)',
+          filter: 'drop-shadow(0 0 16px rgba(255, 111, 159, 0.86))',
           duration: reduceMotion ? 0.01 : 0.28,
           ease: 'back.out(2)',
         },
         '>-0.04',
       )
-      .fromTo(
+    }
+    if (cards.length > 0) {
+      timeline.fromTo(
         cards,
         { autoAlpha: 0, y: 20, rotateX: -10, rotateY: -5, filter: 'blur(10px)' },
         {
@@ -2374,6 +3393,7 @@ function ConstellationExperience({
         },
         '<0.12',
       )
+    }
   }, { scope: rootRef, dependencies: [currentZodiac.id, guardianBreedIds.join('|'), language] })
 
   const runGuardianMatch = () => {
@@ -2428,17 +3448,12 @@ function ConstellationExperience({
         </div>
         <div className="zodiac-preview">
           <div className="zodiac-orbit" aria-hidden="true">
-            {Array.from({ length: 12 }, (_, index) => (
-              <span
-                key={index}
-                className={[
-                  'zodiac-orbit-dot',
-                  zodiacProfiles[index]?.id === currentZodiac.id ? 'is-current' : '',
-                ].filter(Boolean).join(' ')}
-                style={{ '--dot-index': index } as CSSProperties}
-              />
+            {[0, 1, 2].map((index) => (
+              <span key={index} className={`zodiac-badge-spark spark-${index + 1}`} />
             ))}
-            <strong aria-hidden="true">{zodiac.name[language].slice(0, 1)}</strong>
+            <strong className="zodiac-badge-current" aria-hidden="true">
+              {zodiac.symbol}
+            </strong>
           </div>
           <span>
             <small>{copy[language].birthDate} · {dateLabelFor(birthday, language)}</small>
@@ -2525,469 +3540,685 @@ function ConstellationExperience({
   )
 }
 
-function PassportExperience({
+function CatHomeExperience({
   language,
+  exploredBreedIds,
   favoriteBreedIds,
-  guardianBirthday,
-  guardianZodiacId,
   guardianBreedIds,
-  shareCardMode,
-  shareCardSide,
+  dailyBreedId,
+  companionBreedId,
+  homeCatBreedId,
+  homeMood,
+  homeStats,
+  homeLevel,
+  homeXp,
+  homeStardust,
+  homeDailyWish,
+  homeDiaryEntries,
+  homeUnlockedDecorIds,
+  homeEquippedDecorIds,
+  homeInteractionMode,
+  homeLastAction,
   compareBreedIds,
   onSelectBreed,
   onToggleCompare,
-  onSetShareCardMode,
-  onSetShareCardSide,
-  onSelectExperience,
+  onSetHomeCatBreed,
+  onClearHomeCatBreed,
+  onPerformHomeAction,
+  onCompleteDailyWish,
+  onEquipHomeDecor,
 }: {
   language: Language
+  exploredBreedIds: string[]
   favoriteBreedIds: string[]
-  guardianBirthday: GuardianBirthday | null
-  guardianZodiacId: string | null
   guardianBreedIds: string[]
-  shareCardMode: ShareCardMode
-  shareCardSide: ShareCardSide
+  dailyBreedId: string | null
+  companionBreedId: string | null
+  homeCatBreedId: string | null
+  homeMood: HomeMood
+  homeStats: HomeStatsState
+  homeLevel: number
+  homeXp: number
+  homeStardust: number
+  homeDailyWish: HomeDailyWish
+  homeDiaryEntries: HomeDiaryEntry[]
+  homeUnlockedDecorIds: HomeDecorId[]
+  homeEquippedDecorIds: HomeDecorId[]
+  homeInteractionMode: HomeInteractionMode
+  homeLastAction: HomeAction | null
   compareBreedIds: string[]
   onSelectBreed: (breed: BreedOrigin) => void
   onToggleCompare: (id: string) => void
-  onSetShareCardMode: (mode: ShareCardMode) => void
-  onSetShareCardSide: (side: ShareCardSide) => void
-  onSelectExperience: (experience: ActiveExperience) => void
+  onSetHomeCatBreed: (id: string | null) => void
+  onClearHomeCatBreed: () => void
+  onPerformHomeAction: (action: HomeAction) => void
+  onCompleteDailyWish: (source: HomeWishCompletionSource) => void
+  onEquipHomeDecor: (decorId: HomeDecorId) => void
 }) {
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const cardFaceRef = useRef<HTMLDivElement | null>(null)
-  const duoExportRef = useRef<HTMLDivElement | null>(null)
-  const [generating, setGenerating] = useState(false)
-  const [generatingKind, setGeneratingKind] = useState<'single' | 'double' | null>(null)
-  const favoriteBreeds = favoriteBreedIds
-    .map((id) => getBreedById(id))
-    .filter((breed): breed is BreedOrigin => Boolean(breed))
-  const guardianZodiac = zodiacById(guardianZodiacId)
-  const guardianBreeds = guardianBreedIds
-    .map((id) => getBreedById(id))
-    .filter((breed): breed is BreedOrigin => Boolean(breed))
-  const cardBreeds = shareCardMode === 'guardian'
-    ? guardianBreeds
-    : favoriteBreeds
-  const mainGuardian = cardBreeds[0] ?? guardianBreeds[0] ?? favoriteBreeds[0] ?? null
-  const hasCardData = Boolean(mainGuardian) || favoriteBreeds.length > 0
-  const displayedBreeds = (cardBreeds.length > 0 ? cardBreeds : favoriteBreeds).slice(0, 3)
-  const cardTitle = shareCardMode === 'guardian'
-    ? copy[language].shareCardGuardian
-    : copy[language].shareCardFavorites
-  const cardKeyword = mainGuardian
-    ? guardianKeywordForBreed(mainGuardian.id, language)
-    : language === 'zh' ? '收藏 / 探索 / 治愈' : 'favorite / explore / comfort'
-  const coordinateLabel = mainGuardian
-    ? `${mainGuardian.lat.toFixed(1)}, ${mainGuardian.lon.toFixed(1)}`
-    : '0.0, 0.0'
-  const dateLabel = guardianZodiac
-    ? `${guardianZodiac.name[language]} · ${dateLabelFor(guardianBirthday, language)}`
-    : copy[language].savedCoordinates
-  const shareLines = [
-    copy[language].cardLineOne,
-    copy[language].cardLineTwo,
-    copy[language].cardLineThree,
+  const decorGridRef = useRef<HTMLDivElement | null>(null)
+  const actionTimelineRef = useRef<gsap.core.Timeline | null>(null)
+  const { contextSafe } = useGSAP({ scope: rootRef })
+  const [pickerCollapsed, setPickerCollapsed] = useState(Boolean(homeCatBreedId))
+  const homeBreed = getBreedById(homeCatBreedId)
+  const suggestedBreed = getBreedById(companionBreedId)
+    ?? guardianBreedIds.map((id) => getBreedById(id)).find((breed): breed is BreedOrigin => Boolean(breed))
+    ?? exploredBreedIds.map((id) => getBreedById(id)).find((breed): breed is BreedOrigin => Boolean(breed))
+    ?? getBreedById(dailyBreedId)
+    ?? null
+  const activeBreed = homeBreed
+  const candidateBreeds = useMemo(() => {
+    const personalizedBreeds = [...new Set([...guardianBreedIds, ...favoriteBreedIds, ...exploredBreedIds, dailyBreedId].filter((id): id is string => Boolean(id)))]
+      .map((id) => getBreedById(id))
+      .filter((breed): breed is BreedOrigin => Boolean(breed))
+    const fallbackBreeds = breeds.filter((breed) => breed.atlasKind !== 'coatPattern').slice(0, 6)
+    return [...new Map([...personalizedBreeds, ...fallbackBreeds].map((breed) => [breed.id, breed])).values()].slice(0, 6)
+  }, [dailyBreedId, exploredBreedIds, favoriteBreedIds, guardianBreedIds])
+  const wishTargetBreed = useMemo(() => {
+    if (homeDailyWish.type === 'exploreRegion' && homeDailyWish.targetRegion) {
+      return breeds.find((breed) => breed.region === homeDailyWish.targetRegion && breed.atlasKind !== 'coatPattern')
+        ?? suggestedBreed
+    }
+    if (homeDailyWish.type === 'findPersonality' && homeDailyWish.targetPersonalityZoneId) {
+      return breedsForPersonalityZone(homeDailyWish.targetPersonalityZoneId, 1)[0] ?? suggestedBreed
+    }
+    if (homeDailyWish.type === 'openStory') {
+      return (activeBreed?.externalStories.length ? activeBreed : breeds.find((breed) => breed.externalStories.length > 0))
+        ?? suggestedBreed
+    }
+    if (homeDailyWish.type === 'favoriteBreed' || homeDailyWish.type === 'compareBreed') {
+      return activeBreed ?? suggestedBreed ?? getBreedById(dailyBreedId)
+    }
+    return activeBreed ?? suggestedBreed
+  }, [activeBreed, dailyBreedId, homeDailyWish, suggestedBreed])
+  const homeActionText = {
+    feed: copy[language].homeActionFeed,
+    groom: copy[language].homeActionGroom,
+    clean: copy[language].homeActionClean,
+    play: copy[language].homeActionPlay,
+    rest: copy[language].homeActionRest,
+  } satisfies Record<HomeAction, string>
+  const actionText = homeLastAction ? homeActionText[homeLastAction] : copy[language].catHomeIntro
+  const moodLabel: Record<HomeMood, string> = {
+    idle: language === 'zh' ? '待机' : 'Idle',
+    happy: language === 'zh' ? '开心' : 'Happy',
+    hungry: language === 'zh' ? '想吃饭' : 'Hungry',
+    clean: language === 'zh' ? '清爽' : 'Fresh',
+    playful: language === 'zh' ? '想玩' : 'Playful',
+    sleepy: language === 'zh' ? '困了' : 'Sleepy',
+  }
+  const homeActions: Array<{ id: HomeAction; icon: typeof Cat; label: string }> = [
+    { id: 'feed', icon: Soup, label: copy[language].homeFeed },
+    { id: 'groom', icon: Brush, label: copy[language].homeGroom },
+    { id: 'clean', icon: Sparkles, label: copy[language].homeCleanAction },
+    { id: 'play', icon: Gamepad2, label: copy[language].homePlay },
+    { id: 'rest', icon: CalendarDays, label: copy[language].homeRest },
   ]
-  const compareSelected = mainGuardian ? compareBreedIds.includes(mainGuardian.id) : false
-  const compareFull = Boolean(mainGuardian) && compareBreedIds.length >= 3 && !compareSelected
+  const careRows = [
+    { key: 'fullness', label: copy[language].homeHunger, value: homeStats.fullness },
+    { key: 'cleanliness', label: copy[language].homeClean, value: homeStats.cleanliness },
+    { key: 'energy', label: copy[language].homeEnergy, value: homeStats.energy },
+    { key: 'mood', label: copy[language].homeMoodStat, value: homeStats.mood },
+    { key: 'affection', label: copy[language].homeAffection, value: homeStats.affection },
+  ]
+  const levelTitle = homeLevelTitles[language][Math.max(0, homeLevel - 1)] ?? homeLevelTitles[language][0]
+  const xpTarget = homeXpTargetForLevel(homeLevel)
+  const equippedDecor = homeDecorCatalog.filter((decor) => homeEquippedDecorIds.includes(decor.id))
+  const diaryEntries = homeDiaryEntries.slice(0, 3)
+  const wishLabel = homeWishLabel(homeDailyWish, language)
+  const wishCtaLabel = homeWishCtaLabel(homeDailyWish, language)
+  const pickerOpen = !homeCatBreedId || !pickerCollapsed
 
   useGSAP(() => {
-    if (!cardFaceRef.current) return
+    if (!rootRef.current) return
     const reduceMotion = prefersReducedMotion()
-    const face = cardFaceRef.current
-    const timeline = gsap.timeline({
-      defaults: {
-        duration: reduceMotion ? 0.01 : 0.46,
-        ease: 'power3.out',
-      },
-    })
-
-    timeline
-      .fromTo(
-        face,
-        { autoAlpha: 0, y: 34, rotate: -1.6, scale: 0.965, filter: 'blur(10px)' },
-        { autoAlpha: 1, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)' },
-      )
-      .fromTo(
-        '.share-card-photo-mask',
-        { scaleX: 0, transformOrigin: 'left center' },
-        { scaleX: 1, duration: reduceMotion ? 0.01 : 0.5, ease: 'power3.inOut' },
-        '<0.08',
-      )
-      .fromTo(
-        '.share-card-rule',
-        { scaleX: 0, transformOrigin: 'left center' },
-        { scaleX: 1, duration: reduceMotion ? 0.01 : 0.48, ease: 'power2.out' },
-        '<0.08',
-      )
-      .fromTo(
-        '.share-card-stamp, .share-card-postmark, .share-card-chip',
-        { autoAlpha: 0, scale: 0.7, rotate: -8 },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          rotate: 0,
-          duration: reduceMotion ? 0.01 : 0.36,
-          ease: 'back.out(1.8)',
-          stagger: reduceMotion ? 0 : 0.05,
-        },
-        '<0.12',
-      )
-      .fromTo(
-        '.share-card-animate',
-        { autoAlpha: 0, y: 16 },
+    const homeCat = rootRef.current.querySelector('.cat-home-pet')
+    const roomItems = rootRef.current.querySelectorAll('.cat-home-room-item, .cat-home-room-prop')
+    const statusRows = rootRef.current.querySelectorAll('.cat-home-meter')
+    const animatedItems = rootRef.current.querySelectorAll('[data-home-animate]')
+    if (animatedItems.length > 0) {
+      gsap.fromTo(
+        animatedItems,
+        { autoAlpha: 0, y: 18, scale: 0.98, filter: 'blur(8px)' },
         {
           autoAlpha: 1,
           y: 0,
-          duration: reduceMotion ? 0.01 : 0.34,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: reduceMotion ? 0.01 : 0.36,
+          ease: 'power3.out',
           stagger: reduceMotion ? 0 : 0.045,
         },
-        '<0.04',
       )
-  }, {
-    scope: rootRef,
-    dependencies: [
-      shareCardMode,
-      shareCardSide,
-      guardianBreedIds.join('|'),
-      favoriteBreedIds.join('|'),
-      language,
-    ],
-  })
+    }
+    if (homeCat) {
+      gsap.fromTo(
+        homeCat,
+        { y: 10, scale: 0.94, rotate: homeMood === 'playful' ? -5 : 0 },
+        {
+          y: 0,
+          scale: 1,
+          rotate: 0,
+          duration: reduceMotion ? 0.01 : 0.48,
+          ease: homeMood === 'playful' ? 'back.out(2.1)' : 'power3.out',
+        },
+      )
+    }
+    if (roomItems.length > 0) {
+      gsap.fromTo(
+        roomItems,
+        { autoAlpha: 0.4, y: 12, scale: 0.9 },
+        { autoAlpha: 1, y: 0, scale: 1, duration: reduceMotion ? 0.01 : 0.34, ease: 'back.out(1.7)', stagger: reduceMotion ? 0 : 0.04 },
+      )
+    }
+    if (statusRows.length > 0) {
+      gsap.fromTo(
+        statusRows,
+        { scaleX: 0.96, filter: 'brightness(1.08)' },
+        { scaleX: 1, filter: 'brightness(1)', duration: reduceMotion ? 0.01 : 0.24, ease: 'power2.out' },
+      )
+    }
+  }, { scope: rootRef, dependencies: [activeBreed?.id, homeMood, homeLastAction, homeDailyWish.id, language] })
 
-  const exportNode = async (
-    node: HTMLElement,
-    filename: string,
-    kind: 'single' | 'double',
-  ) => {
-    if (!hasCardData) return
-    setGenerating(true)
-    setGeneratingKind(kind)
-    const reduceMotion = prefersReducedMotion()
-    try {
-      await gsap.to(node, {
-        scale: reduceMotion ? 1 : 1.012,
-        filter: 'brightness(1.035) saturate(1.06)',
-        duration: reduceMotion ? 0.01 : 0.16,
-        yoyo: true,
-        repeat: 1,
-        ease: 'power2.out',
+  useGSAP(() => {
+    if (!decorGridRef.current) return
+    const state = Flip.getState(decorGridRef.current.querySelectorAll('.cat-home-decor-card'))
+    window.requestAnimationFrame(() => {
+      Flip.from(state, {
+        duration: prefersReducedMotion() ? 0.01 : 0.34,
+        ease: 'power3.out',
+        absolute: false,
+        simple: true,
+        stagger: prefersReducedMotion() ? 0 : 0.035,
       })
-      const dataUrl = await toPng(node, {
-        cacheBust: true,
-        pixelRatio: 2,
-        backgroundColor: '#fff7f3',
-      })
-      const link = document.createElement('a')
-      link.download = filename
-      link.href = dataUrl
-      link.click()
-    } finally {
-      gsap.set(node, { clearProps: 'scale,filter' })
-      setGenerating(false)
-      setGeneratingKind(null)
+    })
+  }, { scope: decorGridRef, dependencies: [homeEquippedDecorIds.join('|'), homeUnlockedDecorIds.join('|')] })
+
+  const handleAction = (action: HomeAction) => {
+    contextSafe(() => {
+      onPerformHomeAction(action)
+      const root = rootRef.current
+      if (!root) return
+      const target = root.querySelector('.cat-home-pet')
+      const effect = root.querySelector('.cat-home-effect[data-action="' + action + '"]')
+      const food = root.querySelector('.cat-home-food')
+      const brush = root.querySelector('.cat-home-brush')
+      const wand = root.querySelector('.cat-home-wand')
+      const nap = root.querySelector('.cat-home-nap')
+      const reward = root.querySelectorAll('.cat-home-reward-dot')
+      const toy = root.querySelector('.cat-home-toy-ball')
+      const bowl = root.querySelector('.cat-home-bowl')
+      const shine = root.querySelector('.cat-home-shine')
+      const room = root.querySelector('.cat-home-room')
+      if (!target || !effect) return
+      actionTimelineRef.current?.kill()
+      const reduceMotion = prefersReducedMotion()
+      const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
+      actionTimelineRef.current = timeline
+      gsap.set([food, brush, wand, nap], { autoAlpha: 0 })
+      gsap.set(reward, { autoAlpha: 0, scale: 0.4, x: 0, y: 0 })
+      if (reduceMotion) {
+        timeline.to(target, { scale: 1.03, duration: 0.01 }).to(target, { scale: 1, duration: 0.01 })
+        return
+      }
+      timeline
+        .to(room, { filter: action === 'rest' ? 'brightness(0.96) saturate(0.95)' : 'brightness(1.05) saturate(1.08)', duration: 0.18 }, 0)
+        .to(target, {
+          y: action === 'play' ? -22 : action === 'rest' ? 10 : -8,
+          scale: action === 'feed' ? 1.1 : action === 'play' ? 1.08 : 1.04,
+          rotate: action === 'groom' ? 2 : action === 'play' ? -6 : action === 'rest' ? 1 : 0,
+          duration: 0.24,
+        }, 0)
+        .fromTo(effect, { autoAlpha: 0, y: 22, scale: 0.56 }, { autoAlpha: 1, y: 0, scale: 1.1, duration: 0.3 }, '<0.03')
+      if (action === 'feed' && bowl) {
+        timeline.fromTo(food, { autoAlpha: 0, x: -120, y: -78, scale: 0.52, rotate: -26 }, { autoAlpha: 1, x: 18, y: 28, scale: 1.16, rotate: 16, duration: 0.64, ease: 'power2.inOut' }, '<')
+          .fromTo(bowl, { scale: 0.82, y: 18 }, { scale: 1.14, y: -2, duration: 0.24 }, '<')
+          .to(target, { x: 14, y: -2, scale: 1.12, duration: 0.24 }, '<0.2')
+          .to(bowl, { scale: 1, y: 0, duration: 0.24 }, '>')
+          .to(food, { autoAlpha: 0, scale: 0.45, duration: 0.24 }, '>-0.04')
+      }
+      if (action === 'groom') {
+        timeline.fromTo(brush, { autoAlpha: 0, x: -128, y: -28, rotate: -16 }, { autoAlpha: 1, x: 104, y: 24, rotate: 14, duration: 0.58, ease: 'power2.inOut' }, '<')
+          .to(brush, { x: -70, y: -8, rotate: -12, duration: 0.42, ease: 'power2.inOut' })
+          .to(brush, { autoAlpha: 0, y: -28, duration: 0.24 })
+      }
+      if (action === 'play' && toy) {
+        timeline.fromTo(wand, { autoAlpha: 0, x: -118, y: -76, rotate: -28 }, { autoAlpha: 1, x: 78, y: -24, rotate: 22, duration: 0.48, ease: 'power2.inOut' }, '<')
+          .to(toy, { x: -72, y: 44, rotate: 300, scale: 1.2, duration: 0.48, ease: 'power2.inOut' }, '<')
+          .to(target, { y: -30, x: -10, rotate: -8, scale: 1.1, duration: 0.28, ease: 'back.out(2.4)' }, '<0.16')
+          .to(toy, { x: 0, y: 0, rotate: 0, scale: 1, duration: 0.34, ease: 'power3.out' })
+          .to(wand, { autoAlpha: 0, x: 90, y: -44, duration: 0.26 }, '<0.1')
+      }
+      if ((action === 'groom' || action === 'clean') && shine) {
+        timeline.fromTo(shine, { autoAlpha: 0, x: -140 }, { autoAlpha: 1, x: 150, duration: 0.58 }, '<')
+          .to(shine, { autoAlpha: 0, duration: 0.16 })
+      }
+      if (action === 'clean') {
+        timeline.to(root.querySelectorAll('.cat-home-room-prop, .cat-home-room-item'), { y: -3, scale: 1.04, duration: 0.18, stagger: 0.025 }, '<0.06')
+          .to(root.querySelectorAll('.cat-home-room-prop, .cat-home-room-item'), { y: 0, scale: 1, duration: 0.22, stagger: 0.02 })
+      }
+      if (action === 'rest') {
+        timeline.fromTo(nap, { autoAlpha: 0, y: 12, scale: 0.7 }, { autoAlpha: 1, y: -18, scale: 1, duration: 0.46 }, '<')
+          .to(nap, { autoAlpha: 0, y: -34, scale: 0.84, duration: 0.36 }, '>')
+      }
+      timeline
+        .fromTo(reward, { autoAlpha: 0, scale: 0.45, x: 0, y: 0 }, {
+          autoAlpha: 1,
+          scale: 1,
+          x: (index) => [-52, 44, 6][index] ?? 0,
+          y: (index) => [-46, -34, -62][index] ?? -28,
+          duration: 0.42,
+          stagger: 0.06,
+          ease: 'back.out(1.8)',
+        }, '<0.08')
+        .to(reward, { autoAlpha: 0, y: -82, duration: 0.38, stagger: 0.04 }, '>-0.02')
+        .to(target, { x: 0, y: 0, scale: 1, rotate: 0, duration: 0.38, ease: 'back.out(1.7)' })
+        .to(effect, { scale: 1, duration: 0.26 }, '<')
+        .to(effect, { autoAlpha: 0, y: -12, duration: 0.28 }, '+=0.08')
+        .to(room, { filter: 'brightness(1) saturate(1)', duration: 0.28 }, '<')
+    })()
+  }
+
+  const handleWishCta = () => {
+    if (homeDailyWish.completed) return
+    if (homeDailyWish.type === 'careAction' && homeDailyWish.targetAction) {
+      handleAction(homeDailyWish.targetAction)
+      return
+    }
+    if (homeDailyWish.type === 'exploreRegion' || homeDailyWish.type === 'findPersonality') {
+      if (wishTargetBreed) onSelectBreed(wishTargetBreed)
+      return
+    }
+    if (homeDailyWish.type === 'openStory') {
+      const storyUrl = wishTargetBreed?.externalStories[0]?.url ?? wishTargetBreed?.verifiedStory.sourceUrl
+      if (storyUrl) {
+        window.open(storyUrl, '_blank', 'noopener,noreferrer')
+      }
+      onCompleteDailyWish({ kind: 'story', breedId: wishTargetBreed?.id })
+      return
+    }
+    if (homeDailyWish.type === 'favoriteBreed') {
+      if (wishTargetBreed && !favoriteBreedIds.includes(wishTargetBreed.id)) {
+        onSelectBreed(wishTargetBreed)
+      }
+      onCompleteDailyWish({ kind: 'favorite', breedId: wishTargetBreed?.id })
+      return
+    }
+    if (homeDailyWish.type === 'compareBreed' && wishTargetBreed) {
+      onToggleCompare(wishTargetBreed.id)
     }
   }
 
-  const downloadCurrentSide = async () => {
-    if (!cardFaceRef.current) return
-    await exportNode(cardFaceRef.current, `cat-planet-${shareCardSide}.png`, 'single')
-  }
-
-  const downloadBothSides = async () => {
-    if (!duoExportRef.current) return
-    await exportNode(duoExportRef.current, 'cat-planet-card-front-back.png', 'double')
-  }
-
-  return (
-    <div ref={rootRef} className="passport-panel" data-animate-item>
-      <div className="passport-mode-switch">
-        <button
-          type="button"
-          className={shareCardMode === 'guardian' ? 'active' : ''}
-          onClick={() => onSetShareCardMode('guardian')}
-        >
-          {copy[language].shareCardModeGuardian}
-        </button>
-        <button
-          type="button"
-          className={shareCardMode === 'favorites' ? 'active' : ''}
-          onClick={() => onSetShareCardMode('favorites')}
-        >
-          {copy[language].shareCardModeFavorites}
+  const pickerSection = (
+    <section className="cat-home-picker" data-home-animate>
+      <div className="passport-section-title">
+        <h3>{language === 'zh' ? '更换入住猫' : 'Change home cat'}</h3>
+        <p>{activeBreed ? (language === 'zh' ? '小家一次只住一只猫。需要更换时，从下面选择新的入住猫。' : 'Only one cat lives here at a time. Pick another cat below to replace it.') : copy[language].passportIntro}</p>
+        <button type="button" className="cat-home-picker-toggle" onClick={() => setPickerCollapsed((collapsed) => !collapsed)}>
+          {pickerOpen ? (language === 'zh' ? '收起候选' : 'Hide choices') : copy[language].catHomePick}
         </button>
       </div>
-      <div className={`passport-card ${hasCardData ? 'has-share-card' : ''}`}>
-        <span>{copy[language].passportTitle}</span>
-        <h3>{copy[language].shareCardTitle}</h3>
-        <p className="passport-purpose">{copy[language].shareCardPurpose}</p>
-        {!hasCardData ? (
-          <p className="passport-empty">{copy[language].passportEmpty}</p>
-        ) : (
-          <>
-            <div className="share-card-side-switch">
-              <button
-                type="button"
-                className={shareCardSide === 'front' ? 'active' : ''}
-                onClick={() => onSetShareCardSide('front')}
+      {candidateBreeds.length === 0 ? (
+        <p className="passport-empty">{copy[language].homeNoCat}</p>
+      ) : pickerOpen ? (
+        <div className="cat-home-candidates">
+          {candidateBreeds.map((breed) => {
+            const selected = breed.id === activeBreed?.id
+            const compareSelected = compareBreedIds.includes(breed.id)
+            const compareFull = compareBreedIds.length >= 3 && !compareSelected
+            return (
+              <article
+                key={breed.id}
+                className={selected ? 'active' : ''}
+                data-drag-breed-id={breed.id}
+                data-compare-drag-source="true"
               >
-                {copy[language].shareCardFront}
-              </button>
-              <button
-                type="button"
-                className={shareCardSide === 'back' ? 'active' : ''}
-                onClick={() => onSetShareCardSide('back')}
-              >
-                {copy[language].shareCardBack}
-              </button>
-            </div>
-            <ShareCardFace
-              ref={cardFaceRef}
-              side={shareCardSide}
-              language={language}
-              title={cardTitle}
-              keyword={cardKeyword}
-              dateLabel={dateLabel}
-              coordinateLabel={coordinateLabel}
-              guardianZodiac={guardianZodiac}
-              mainBreed={mainGuardian}
-              displayedBreeds={displayedBreeds}
-              shareLines={shareLines}
-            />
-            <div ref={duoExportRef} className="share-card-duo-export" aria-hidden="true">
-              <ShareCardFace
-                side="front"
-                language={language}
-                title={cardTitle}
-                keyword={cardKeyword}
-                dateLabel={dateLabel}
-                coordinateLabel={coordinateLabel}
-                guardianZodiac={guardianZodiac}
-                mainBreed={mainGuardian}
-                displayedBreeds={displayedBreeds}
-                shareLines={shareLines}
-              />
-              <ShareCardFace
-                side="back"
-                language={language}
-                title={cardTitle}
-                keyword={cardKeyword}
-                dateLabel={dateLabel}
-                coordinateLabel={coordinateLabel}
-                guardianZodiac={guardianZodiac}
-                mainBreed={mainGuardian}
-                displayedBreeds={displayedBreeds}
-                shareLines={shareLines}
-              />
-            </div>
-            {mainGuardian && (
-              <div className="passport-cta-row">
-                <button type="button" onClick={() => onSelectBreed(mainGuardian)}>
-                  <BookOpen size={14} />
-                  {copy[language].viewStory}
+                <span className="drag-grip cat-home-drag-grip" aria-hidden="true">
+                  {language === 'zh' ? '拖' : 'drag'}
+                </span>
+                <button type="button" onClick={() => onSetHomeCatBreed(breed.id)}>
+                  <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
+                  <span>
+                    <strong>{breed.localized[language].name}</strong>
+                    <small>{getLocalizedTraits(breed, language).slice(0, 2).join(' / ')}</small>
+                  </span>
                 </button>
-                <button
-                  type="button"
-                  disabled={compareFull}
-                  onClick={() => onToggleCompare(mainGuardian.id)}
-                >
-                  <GitCompare size={14} />
-                  {compareSelected ? copy[language].compareRemove : copy[language].compareAdd}
-                </button>
-                <button type="button" onClick={() => onSelectExperience('constellation')}>
-                  <Star size={14} />
-                  {copy[language].testFriend}
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-      {favoriteBreeds.length > 0 && (
-        <div className="passport-saved-list">
-          <h3>{copy[language].savedCoordinates}</h3>
-          {favoriteBreeds.map((breed) => {
-              const compareSelected = compareBreedIds.includes(breed.id)
-              const compareFull = compareBreedIds.length >= 3 && !compareSelected
-              return (
-                <article key={breed.id} className="passport-breed">
-                  <button type="button" onClick={() => onSelectBreed(breed)}>
-                    <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
-                    <span>
-                      {breed.localized[language].name}
-                      <small>{breed.lat.toFixed(1)}, {breed.lon.toFixed(1)} · {getLocalizedTraits(breed, language).slice(0, 2).join(' / ')}</small>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    disabled={compareFull}
-                    className="passport-compare"
-                    onClick={() => onToggleCompare(breed.id)}
-                  >
+                <div>
+                  <button type="button" onClick={() => onSelectBreed(breed)}>{copy[language].landHere}</button>
+                  <button type="button" disabled={compareFull} onClick={() => onToggleCompare(breed.id)}>
                     {compareSelected ? copy[language].compareRemove : copy[language].compareAdd}
                   </button>
-                </article>
-              )
+                </div>
+              </article>
+            )
           })}
         </div>
+      ) : (
+        <p className="passport-empty">{language === 'zh' ? '候选列表已收起。当前小家只保留一只入住猫。' : 'Choices are hidden. Cat Home keeps one active home cat.'}</p>
       )}
-      <button
-        type="button"
-        className="passport-download"
-        disabled={!hasCardData || generating}
-        onClick={downloadCurrentSide}
-      >
-        <Download size={16} />
-        {generating && generatingKind === 'single'
-          ? copy[language].generatingCard
-          : copy[language].downloadCurrentCard}
-      </button>
-      <button
-        type="button"
-        className="passport-download secondary"
-        disabled={!hasCardData || generating}
-        onClick={downloadBothSides}
-      >
-        <Share2 size={16} />
-        {generating && generatingKind === 'double'
-          ? copy[language].generatingCard
-          : copy[language].downloadBothCards}
-      </button>
+    </section>
+  )
+
+  return (
+    <div ref={rootRef} className="cat-home-panel" data-animate-item>
+      <section className="cat-home-hero" data-home-animate>
+        <div className="cat-home-room" aria-hidden="true">
+          <span className="cat-home-wall-art cat-home-room-prop" />
+          <span className="cat-home-window cat-home-room-prop" />
+          <span className="cat-home-shelf cat-home-room-prop" />
+          <span className="cat-home-bowl cat-home-room-prop" />
+          <span className="cat-home-toy-ball cat-home-room-prop" />
+          <span className="cat-home-shine" />
+          {equippedDecor.map((decor) => (
+            <span key={decor.id} className={'cat-home-room-item ' + decor.id} />
+          ))}
+          {equippedDecor.length === 0 && <span className="cat-home-room-item soft-rug" />}
+          <span className="cat-home-effect" data-action="feed">{language === 'zh' ? '小鱼干' : 'snack'}</span>
+          <span className="cat-home-effect" data-action="groom">{language === 'zh' ? '梳顺啦' : 'brushed'}</span>
+          <span className="cat-home-effect" data-action="clean">{language === 'zh' ? '亮起来' : 'clean'}</span>
+          <span className="cat-home-effect" data-action="play">{language === 'zh' ? '扑一下' : 'pounce'}</span>
+          <span className="cat-home-effect" data-action="rest">{language === 'zh' ? '打个盹' : 'nap'}</span>
+          <span className="cat-home-food" aria-hidden="true" />
+          <span className="cat-home-brush" aria-hidden="true" />
+          <span className="cat-home-wand" aria-hidden="true" />
+          <span className="cat-home-nap" aria-hidden="true">Zz</span>
+          <span className="cat-home-reward-dot dot-a" aria-hidden="true" />
+          <span className="cat-home-reward-dot dot-b" aria-hidden="true" />
+          <span className="cat-home-reward-dot dot-c" aria-hidden="true" />
+        </div>
+        <div className="cat-home-pet">
+          {activeBreed?.photo.verifiedBreedPhoto ? (
+            <img
+              src={activeBreed.photo.src}
+              alt=""
+              style={{
+                objectFit: activeBreed.photo.fit ?? 'cover',
+                objectPosition: activeBreed.photo.objectPosition ?? '50% 38%',
+              }}
+            />
+          ) : (
+            <Cat size={44} />
+          )}
+        </div>
+        <div className="cat-home-copy">
+          <span>{copy[language].catHomeTitle}</span>
+          <h3>{activeBreed ? activeBreed.localized[language].name : copy[language].homeNoCat}</h3>
+          <p>{actionText}</p>
+          <div className="cat-home-mood-row">
+            <em>{moodLabel[homeMood]}</em>
+            {activeBreed && (
+              <button type="button" className="cat-home-remove" onClick={onClearHomeCatBreed}>
+                {language === 'zh' ? '移出小家' : 'Remove home cat'}
+              </button>
+            )}
+            {homeDiaryEntries.some((entry) => entry.textZh === copy.zh.homeAwayNote || entry.textEn === copy.en.homeAwayNote) && (
+              <small>{copy[language].homeAwayNote}</small>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="cat-home-actions" data-home-animate>
+        {homeActions.map((action) => {
+          const Icon = action.icon
+          return (
+            <button
+              key={action.id}
+              type="button"
+              disabled={!activeBreed}
+              className={homeInteractionMode === actionModeFor(action.id) ? 'active' : ''}
+              onClick={() => handleAction(action.id)}
+            >
+              <span><Icon size={16} /></span>
+              {action.label}
+            </button>
+          )
+        })}
+      </section>
+
+      <section className="cat-home-dashboard" data-home-animate>
+        <article className="cat-home-level-card">
+          <span>{copy[language].homeLevel}</span>
+          <strong>Lv.{homeLevel} {levelTitle}</strong>
+          <meter min="0" max={xpTarget} value={homeXp} />
+          <small>{homeXp}/{xpTarget} XP · {copy[language].homeStardust} {homeStardust}</small>
+        </article>
+        <article className={'cat-home-wish-card ' + (homeDailyWish.completed ? 'complete' : '')}>
+          <span>{homeDailyWish.completed ? copy[language].homeWishDone : copy[language].homeDailyWish}</span>
+          <strong>{wishLabel}</strong>
+          <p>
+            {copy[language].homeWishReward}: +{homeDailyWish.reward.xp} XP · +{homeDailyWish.reward.affection} {copy[language].homeAffection} · +{homeDailyWish.reward.stardust} {copy[language].homeStardust}
+          </p>
+          <button type="button" disabled={homeDailyWish.completed} onClick={handleWishCta}>
+            <Sparkles size={15} />
+            {homeDailyWish.completed ? copy[language].homeWishDone : wishCtaLabel}
+          </button>
+        </article>
+      </section>
+
+      <section className="cat-home-status" data-home-animate>
+        {careRows.map((row) => (
+          <div key={row.key} className="cat-home-meter">
+            <span>{row.label}</span>
+            <meter min="0" max="100" value={row.value} />
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </section>
+
+      {pickerSection}
+
+      <section className="cat-home-decor" data-home-animate>
+        <div className="passport-section-title">
+          <h3>{copy[language].homeDecor}</h3>
+          <p>{language === 'zh' ? '装饰会改变小家的动作表现和愿望倾向，不只是摆设。' : 'Decor changes actions and wish tendencies, not just the look.'}</p>
+        </div>
+        <div ref={decorGridRef} className="cat-home-decor-grid">
+          {homeDecorCatalog.map((decor) => {
+            const unlocked = homeUnlockedDecorIds.includes(decor.id)
+            const equipped = homeEquippedDecorIds.includes(decor.id)
+            return (
+              <button
+                key={decor.id}
+                type="button"
+                className={'cat-home-decor-card ' + (equipped ? 'equipped' : '')}
+                disabled={!unlocked}
+                onClick={() => onEquipHomeDecor(decor.id)}
+              >
+                <span className={'decor-symbol ' + decor.id} />
+                <strong>{language === 'zh' ? decor.labelZh : decor.labelEn}</strong>
+                <small>{unlocked ? (language === 'zh' ? decor.descriptionZh : decor.descriptionEn) : 'Lv.' + decor.unlockLevel}</small>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="cat-home-diary" data-home-animate>
+        <div className="passport-section-title">
+          <h3>{copy[language].homeDiary}</h3>
+          <p>{language === 'zh' ? '探索、愿望和照顾会变成猫舱回忆。' : 'Exploration, wishes, and care become cabin memories.'}</p>
+        </div>
+        {diaryEntries.length === 0 ? (
+          <p className="passport-empty">{copy[language].homeEmptyDiary}</p>
+        ) : (
+          <div className="cat-home-diary-list">
+            {diaryEntries.map((entry) => (
+              <article key={entry.id}>
+                <span>{new Date(entry.createdAt).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US')}</span>
+                <p>{language === 'zh' ? entry.textZh : entry.textEn}</p>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
 
-const ShareCardFace = ({
-  ref,
-  side,
+const actionModeFor = (action: HomeAction): HomeInteractionMode => {
+  if (action === 'feed') return 'feeding'
+  if (action === 'groom') return 'grooming'
+  if (action === 'clean') return 'cleaning'
+  if (action === 'play') return 'playing'
+  return 'resting'
+}
+
+const homeWishLabel = (wish: HomeDailyWish, language: Language) => {
+  if (wish.type === 'careAction') {
+    if (wish.targetAction === 'feed') return copy[language].homeWishCareFeed
+    if (wish.targetAction === 'groom') return copy[language].homeWishCareGroom
+    if (wish.targetAction === 'clean') return copy[language].homeWishCareClean
+    if (wish.targetAction === 'play') return copy[language].homeWishCarePlay
+    return copy[language].homeWishCareRest
+  }
+  if (wish.type === 'exploreRegion') {
+    const region = wish.targetRegion ? regionLabel[language][wish.targetRegion] : ''
+    return `${copy[language].homeWishExplore}${region ? ` ${region}` : ''}`
+  }
+  if (wish.type === 'findPersonality') {
+    const zone = wish.targetPersonalityZoneId
+      ? personalityZones.find((item) => item.id === wish.targetPersonalityZoneId)
+      : null
+    const label = zone ? (language === 'zh' ? zone.labelZh : zone.labelEn) : ''
+    return `${copy[language].homeWishPersonality}${label ? ` ${label}` : ''}`
+  }
+  if (wish.type === 'openStory') return copy[language].homeWishStory
+  if (wish.type === 'favoriteBreed') return copy[language].homeWishFavorite
+  return copy[language].homeWishCompare
+}
+
+const homeWishCtaLabel = (wish: HomeDailyWish, language: Language) => {
+  if (wish.type === 'careAction' && wish.targetAction) {
+    const actionLabel: Record<HomeAction, string> = {
+      feed: copy[language].homeFeed,
+      groom: copy[language].homeGroom,
+      clean: copy[language].homeCleanAction,
+      play: copy[language].homePlay,
+      rest: copy[language].homeRest,
+    }
+    return actionLabel[wish.targetAction]
+  }
+  return copy[language].homeGoNow
+}
+
+function CompanionCabin({
+  activeExperience,
   language,
-  title,
-  keyword,
-  dateLabel,
-  coordinateLabel,
-  guardianZodiac,
-  mainBreed,
-  displayedBreeds,
-  shareLines,
+  breed,
+  mood,
+  collapsed,
+  exploredCount,
+  onCollapseChange,
+  onOpenPassport,
 }: {
-  ref?: Ref<HTMLDivElement>
-  side: ShareCardSide
+  activeExperience: ActiveExperience
   language: Language
-  title: string
-  keyword: string
-  dateLabel: string
-  coordinateLabel: string
-  guardianZodiac: ZodiacProfile | null
-  mainBreed: BreedOrigin | null
-  displayedBreeds: BreedOrigin[]
-  shareLines: string[]
-}) => {
-  const mainName = mainBreed?.localized[language].name ?? copy[language].passportTitle
-  const mainEnglishName = mainBreed?.ticaName ?? 'Cat Planet'
-  const photoSrc = mainBreed?.photo.src ?? mainBreed?.photo.markerSrc
-  const photoStyle = mainBreed ? photoStyleFor(mainBreed) : undefined
-  const postcardPhotoStyle = mainBreed ? postcardPhotoStyleFor(mainBreed) : undefined
-  const zodiacLabel = guardianZodiac
-    ? `${guardianZodiac.symbol} ${guardianZodiac.name[language]}`
-    : copy[language].shareCardFavorites
+  breed: BreedOrigin | null
+  mood: HomeMood
+  collapsed: boolean
+  exploredCount: number
+  onCollapseChange: (collapsed: boolean) => void
+  onOpenPassport: () => void
+}) {
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const t = copy[language]
+  const moodLine = {
+    idle: t.companionIdle,
+    happy: t.companionHappy,
+    hungry: language === 'zh' ? '它有点饿了，去小家投喂一下。' : 'It is a bit hungry. Open Cat Home and feed it.',
+    clean: language === 'zh' ? '小家刚整理好，看起来很清爽。' : 'The room feels clean and fresh.',
+    playful: t.companionCurious,
+    sleepy: t.companionSleepy,
+  } satisfies Record<HomeMood, string>
+  const companionName = breed?.localized[language].name ?? t.companionTitle
+
+  useGSAP(() => {
+    if (!rootRef.current) return
+    const reduceMotion = prefersReducedMotion()
+    const face = rootRef.current.querySelector('.companion-face')
+    const bubble = rootRef.current.querySelector('.companion-bubble')
+    gsap.fromTo(
+      rootRef.current,
+      { autoAlpha: 0, y: 20, scale: 0.96 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: reduceMotion ? 0.01 : 0.34,
+        ease: 'back.out(1.5)',
+      },
+    )
+    if (face) {
+      gsap.to(face, {
+        y: mood === 'sleepy' ? 2 : -3,
+        rotation: mood === 'playful' ? 3 : mood === 'happy' ? -3 : 0,
+        duration: reduceMotion ? 0.01 : 1.8,
+        ease: 'sine.inOut',
+        repeat: reduceMotion ? 0 : -1,
+        yoyo: true,
+      })
+    }
+    if (bubble) {
+      gsap.fromTo(
+        bubble,
+        { autoAlpha: 0, y: 8, scale: 0.96 },
+        {
+          autoAlpha: collapsed ? 0 : 1,
+          y: 0,
+          scale: 1,
+          duration: reduceMotion ? 0.01 : 0.26,
+          ease: 'power2.out',
+        },
+      )
+    }
+  }, { scope: rootRef, dependencies: [breed?.id, mood, collapsed, language] })
+
+  if (collapsed) {
+    return (
+      <button
+        ref={rootRef as Ref<HTMLButtonElement>}
+        type="button"
+        className="companion-cabin collapsed"
+        data-experience={activeExperience}
+        onClick={() => onCollapseChange(false)}
+        title={t.companionExpand}
+      >
+        <Cat size={18} />
+        <span>{exploredCount}</span>
+      </button>
+    )
+  }
 
   return (
-    <div
-      ref={ref}
-      className={`share-card-face share-card-${side}`}
-      data-card-side={side}
+    <aside
+      ref={rootRef}
+      className={`companion-cabin mood-${mood}`}
+      data-experience={activeExperience}
+      aria-label={t.companionTitle}
     >
-      <div className="share-card-paper-grain" aria-hidden="true" />
-      <div className="share-card-postmark" aria-hidden="true">
-        <Sparkles size={14} />
-        <span>{copy[language].shareCardStamp}</span>
-      </div>
-      <header className="share-card-editorial-head share-card-animate">
-        <span className="share-card-kicker">{title}</span>
-        <strong>CAT PLANET</strong>
-        <em>{language === 'zh' ? '猫咪星球' : 'Guardian Cat Atlas'}</em>
-      </header>
-      <div className="share-card-rule" aria-hidden="true" />
-
-      {side === 'front' ? (
-        <>
-          <section className="share-card-front-meta share-card-animate">
-            <span>{copy[language].birthDate}</span>
-            <b>{dateLabel}</b>
-            <span>{copy[language].guardianResult}</span>
-            <b>{mainName}</b>
-          </section>
-          <section className="share-card-front-title share-card-animate">
-            <small>{zodiacLabel}</small>
-            <h4>{mainName}</h4>
-            <p>{keyword}</p>
-          </section>
-          <div className="share-card-photo-mask share-card-front-photo">
-            {photoSrc && (
-              <img
-                src={photoSrc}
-                alt=""
-                className="share-card-photo"
-                style={postcardPhotoStyle}
-              />
-            )}
-          </div>
-          <footer className="share-card-editorial-foot share-card-animate">
-            <span>{copy[language].shareCardCoords}</span>
-            <b>{coordinateLabel}</b>
-            <span>{mainEnglishName}</span>
-          </footer>
-        </>
-      ) : (
-        <>
-          <section className="share-card-back-grid">
-            <div className="share-card-photo-mask share-card-back-photo">
-              {photoSrc && (
-                <img
-                  src={photoSrc}
-                  alt=""
-                  className="share-card-photo"
-                  style={photoStyle}
-                />
-              )}
-            </div>
-            <div className="share-card-back-copy share-card-animate">
-              <small>{copy[language].guardianLanding}</small>
-              <h4>{mainName}</h4>
-              <p>{keyword}</p>
-              <dl>
-                <div>
-                  <dt>{copy[language].shareCardCoords}</dt>
-                  <dd>{coordinateLabel}</dd>
-                </div>
-                <div>
-                  <dt>{copy[language].birthDate}</dt>
-                  <dd>{dateLabel}</dd>
-                </div>
-              </dl>
-            </div>
-          </section>
-          <ul className="share-card-copy share-card-animate">
-            {shareLines.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-          <section className="share-card-mini-cats share-card-animate" aria-label={copy[language].shareCardStamps}>
-            {displayedBreeds.map((breed) => (
-              <span key={breed.id}>
-                <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
-                <b>{breed.localized[language].name}</b>
-              </span>
-            ))}
-          </section>
-          <footer className="share-card-editorial-foot share-card-animate">
-            <span>{copy[language].shareCardStamps}</span>
-            <b>{displayedBreeds.length}</b>
-            <span>Cat Planet Passport</span>
-          </footer>
-        </>
-      )}
-    </div>
+      <button
+        type="button"
+        className="companion-collapse"
+        onClick={() => onCollapseChange(true)}
+        title={t.companionCollapse}
+      >
+        <X size={14} />
+      </button>
+      <button type="button" className="companion-main" onClick={onOpenPassport}>
+        <span className="companion-face">
+          {breed?.photo.verifiedBreedPhoto ? (
+            <img src={breed.photo.markerSrc ?? breed.photo.src} alt="" style={photoStyleFor(breed)} />
+          ) : (
+            <Cat size={24} />
+          )}
+        </span>
+        <span className="companion-copy">
+          <small>{t.companionTitle}</small>
+          <strong>{companionName}</strong>
+        </span>
+      </button>
+      <p className="companion-bubble">{moodLine[mood]}</p>
+    </aside>
   )
 }

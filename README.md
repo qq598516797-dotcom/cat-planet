@@ -1,6 +1,6 @@
 # Cat Planet
 
-**猫咪星球** is an interactive 3D cat breed atlas and exploration experience built with React, TypeScript, Three.js, Drei, and GSAP. It maps cat breed origins onto a real WebGL globe, then turns breed discovery into guardian-cat constellations, daily landings, personality tools, shareable Cat Planet cards, and story/video reading paths.
+**Cat Planet** is a playful 3D cat atlas with a Cat Home feeding loop at the front of the experience. Visitors can care for a home cat, complete daily wishes, explore breed origins on a WebGL globe, compare breeds, and save shareable cat-planet moments.
 
 Live demo:
 
@@ -8,41 +8,45 @@ https://qq598516797-dotcom.github.io/cat-planet/
 
 ## Preview
 
+### Cat Home First
+
+![Cat Planet Cat Home](docs/screenshots/cat-home-front-2026.png)
+
+### Feeding Interaction
+
+![Cat Planet feeding interaction](docs/screenshots/cat-home-feeding-2026.png)
+
 ### 3D Breed Globe
 
 ![Cat Planet desktop home](docs/screenshots/desktop-home.png)
-
-### Breed Stories And Videos
-
-![Cat Planet breed stories and videos](docs/screenshots/story-highlight.png)
 
 ### Guardian Cat Card
 
 ![Cat Planet guardian card](docs/screenshots/guardian-card-showcase.png)
 
-### Breed Detail Reading View
-
-![Cat Planet breed detail](docs/screenshots/desktop-detail.png)
-
 ### Mobile Experience
 
 <img src="docs/screenshots/mobile-showcase.png" alt="Cat Planet mobile experience" width="360" />
 
+## Current Focus
+
+- Cat Home is now the first surface users see.
+- One active home cat can be fed, groomed, cleaned, played with, rested, changed, or removed.
+- Daily wishes connect the mini-game back to the planet: explore a region, find a personality match, read a story, favorite a breed, or compare cats.
+- GSAP powers the visible care feedback: food motion, cat movement, room shine, toy motion, reward particles, intro animation, constellation reveal, and smooth UI transitions.
+- App-level, WebGL, and localStorage fallbacks reduce the chance of a black-screen failure.
+
 ## Features
 
-- Real Three.js 3D globe, not a static image or CSS-only fake 3D.
-- Global cat breed origin visualization with photo-based breed markers.
-- Smart marker clustering: hover to expand on desktop, tap to expand on mobile.
-- Chinese-friendly search terms, including common names such as 美短, 英短, 布偶, 缅因, 无毛, 矮脚, and 豹猫.
+- Virtual Cat Home with five care stats: fullness, cleanliness, energy, mood, and affection.
+- Daily wish and lightweight companion-level loop, without coins, penalties, timers, or heavy game systems.
+- Real Three.js globe with photo-based cat markers and breed origin landing.
+- Personality star map for exploring cats by temperament.
+- Breed comparison tools, including drag-friendly PC interactions and button fallback.
+- Guardian cat constellation based on birthday selection.
 - Chinese and English UI modes.
-- Region shortcuts for Global, Asia, Europe, North America, Middle East, and Africa/Oceania.
-- Breed detail pages with photos, origin notes, common names, atlas facts, stories, and external video/story links.
-- Guardian cat constellation: choose a birthday, reveal a zodiac-matched cat, and read why the match fits.
-- Shareable Cat Planet postcard cards with front/back layouts, real cat photos, coordinates, keywords, and favorite-breed stamps.
-- Daily Cat landing card to give the atlas a lightweight reason to revisit.
-- Personality radar, beginner care notes, match quiz, and breed comparison tools.
-- GSAP-powered intro animation, constellation reveal, postcard reveal, hover polish, and smoother marker motion.
-- Responsive layouts for desktop and mobile.
+- Local-first state persistence with Zustand and localStorage.
+- Responsive shell for desktop and mobile, with PC experience prioritized during current iteration.
 
 ## Tech Stack
 
@@ -52,7 +56,7 @@ https://qq598516797-dotcom.github.io/cat-planet/
 - Three.js
 - @react-three/fiber
 - @react-three/drei
-- GSAP
+- GSAP, @gsap/react, Flip, Draggable
 - Zustand
 - Lucide React
 
@@ -64,10 +68,10 @@ Install dependencies:
 npm install
 ```
 
-Start the dev server:
+Start the dev server on the same address used during verification:
 
 ```bash
-npm run dev
+npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
 Create a production build:
@@ -76,23 +80,23 @@ Create a production build:
 npm run build
 ```
 
-Run lint checks:
+Preview the production build:
 
 ```bash
-npm run lint
+npm run preview -- --host 127.0.0.1 --port 4173
+```
+
+Run checks:
+
+```bash
+npx tsc --noEmit
+npm run lint -- --max-warnings=0
 ```
 
 ## Data Notes
 
-Breed names are primarily referenced from TICA breed information. Origin coordinates use country or historical-region centroids for atlas visualization, not precise birth locations. Photos, stories, and external video links include source references inside the app.
+Breed names are primarily referenced from TICA breed information. Origin coordinates use country or historical-region centroids for atlas visualization, not precise birth locations. Local and coat-pattern cats are labeled separately from formal breeds where needed.
 
 ## Project Status
 
-This is a public MVP preview with the core exploration loop in place: browse the 3D globe, reveal a guardian cat, save a Cat Planet card, compare breeds, and continue into stories/videos.
-
-Planned improvements include:
-
-- Adding more verified breed stories, news links, and video references.
-- Improving mobile reading, share-card export polish, and marker interaction.
-- Further optimizing marker clustering and animation performance.
-- Adding more constellation explanations, richer recommendation logic, and visual filters for exploring breeds.
+This is an active public MVP. The current direction is a PC-first exploration product: Cat Home drives return visits, the 3D planet provides discovery, and personality/guardian/compare tools help visitors keep clicking without turning the app into a heavy game.
